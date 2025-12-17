@@ -1,3 +1,40 @@
 spring:
   application:
     name: online-examination-platform
+  datasource:
+    url: jdbc:postgresql://localhost:5432/online_examination_platform
+    username: postgres
+    password: alifaraji12
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    defer-datasource-initialization: false
+
+  sql:
+    init:
+      mode: never
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: alifaraji7747@gmail.com
+    password: vdkjsdghqthzcxyg
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+  messages:
+    encoding: UTF-8
+
+  servlet:
+    multipart:
+      enabled: true

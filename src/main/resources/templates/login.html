@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html
+    th:lang="${#locale.language}"
+    th:attr="dir=#{dir}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Login</title>
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+<body>
+<div class="w-100 jce df" style="font-size: 30px"><a class="lang" href="?lang=fa">فارسی</a>|<a class="lang" href="?lang=en">English</a></div>
+<div class="w-100 jcc df" style="font-size: 30px"><h1 th:text="#{login.welcome}"></h1></div>
+<div th:if="${param.sfl}" class="w-100 jcc df" style="font-size: 20px;color: green"><h1 th:text="#{sfl}"></h1></div>
+<div class="w-100 df jcc" style="font-size: 30px" th:text="#{login.login}"><h1></h1></div>
+<div class="df jcc">
+<form id="form">
+    <label for="username" th:text="#{login.username}"></label><br>
+    <input type="text" id="username" name="username" required><br>
+    <label for="password" th:text="#{login.password}"></label><br>
+    <input type="password" id="password" name="password" required><br>
+    <div class="w-100 df jcc">
+        <h3 th:utext="#{login.register.message}">
+
+        </h3>
+    </div>
+    <div class="w-100 df jcc">
+    <button class="sb" type="submit" th:text="#{login.login}"></button>
+    </div>
+</form>
+</div>
+<div id="error-div" class="w-100 df jcc ed">
+
+</div>
+</body>
+<script>
+    const form = document.getElementById("form");
+    const usernameInp = document.getElementById("username");
+    const passwordInp = document.getElementById("password");
+    const errorDiv = document.getElementById("error-div");
+    const token = document.querySelector('meta[name="_csrf"]').content;
+    const headerName = document.querySelector('meta[name="_csrf_header"]').content;
+    form.addEventListener("submit",function (event){
+        event.preventDefault();
+        const username = usernameInp.value
+        const password = passwordInp.value
+        let data = {username,password}
+        fetch("api/v1/login",{
+            method: "POST",
+            headers:{
+                "Content-Type":"application/json",
+                [headerName]:token
+            },
+            body:JSON.stringify(data)
+            }
+        ).then(async res => {
+            if (!res.ok) {
+            const errorBody = await res.json();
+
+            throw new Error(errorBody.message)
+            }
+
+            window.location.replace("/home")
+        })
+            .catch(error => {
+            errorDiv.innerText = error.message
+        })
+
+    });
+</script>
+</html>

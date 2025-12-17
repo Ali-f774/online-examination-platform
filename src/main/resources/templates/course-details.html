@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}"
+      th:attr="dir=#{dir}">
+<head>
+    <meta charset="UTF-8">
+    <title>Course Details</title>
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+<body>
+<div class="w-100 jce df" style="font-size: 30px"><a class="lang" style="border: solid white 2px;padding: 5px" href="/manager/courses" th:text="#{courses}"></a><a class="lang" th:href="'?lang=fa&'+'id='+${course.id()}">فارسی</a>|<a class="lang" th:href="'?lang=en&'+'id='+${course.id()}">English</a></div>
+<div class="w-100 df jcc">
+    <img th:src="'data:image/jpeg;base64,'+${course.image()}" width="225px" height="225px" th:alt="#{course.image}">
+</div>
+
+<div class="w-100 df jcc">
+    <form th:action="@{/manager/edit-course}" method="post" enctype="multipart/form-data">
+        <input type="hidden" id="id" name="id" th:value="${course.id()}">
+        <label for="title" th:text="#{course.title}"></label><br>
+        <input id="title" name="title" type="text" th:value="${course.title()}" required>
+        <br>
+        <label for="startDate" th:text="#{course.startDate}"></label><br>
+        <input id="startDate" name="startDate" type="date" th:value="${course.startDate()}" required>
+        <br>
+        <label for="endDate" th:text="#{course.endDate}"></label><br>
+        <input id="endDate" name="endDate" type="date" th:value="${course.endDate()}" required>
+        <br>
+        <label for="img" th:text="#{course.image}"></label><br>
+        <input id="img" name="image"  type="file">
+        <br>
+        <input type="submit" class="sb" th:value="#{pending.edit}">
+    </form>
+</div>
+<hr>
+<div class="w-100 df jcc">
+    <label for="professor" th:text="#{professor}"></label>
+    <select th:if="${professor == null}" name="professor" id="professor">
+        <option th:each="p : ${professors}" th:value="${p.getId()}" th:text="${p.getFirstName()}+' '+${p.getLastName()}+'('+#{register.nationalCode}+': '+${p.getNationalCode()}+')'"></option>
+    </select>
+    <button th:if="${professor == null}" id="register-professor" style="background: none;border: solid white 2px;color: white;font-size: 25px" th:text="#{register.professor}"></button>
+    <h2 th:if="${professor != null}" th:text="${professor.firstName()}+' '+${professor.lastName()}+'('+#{register.nationalCode}+': '+${professor.nationalCode()}+')'"></h2>
+    <h2 th:if="${professor != null}"><a th:href="'/manager/course/remove-professor?id='+${course.id()}" style="border: solid red 2px;font-size: 30px" class="lang">🗑️</a></h2>
+
+</div>
+<hr>
+<div class="w-100 df jcc">
+    <ol style="font-size: 15px" th:if="${!students.isEmpty()}">
+        <li th:each="student : ${students}">
+            <h2 th:text="|${student.firstName()} ${student.lastName()} (#{register.nationalCode} : ${student.nationalCode()})|"></h2>
+            <h2><a th:href="'/manager/course/remove-student?courseId='+${course.id()}+'&studentId='+${student.id()}" style="border: solid red 2px;font-size: 30px" class="lang">🗑️</a></h2>
+        </li>
+    </ol>
+</div>
+<div class="w-100 df jcc">
+    <label for="student" th:text="#{add.student}"></label>
+    <select th:if="${!availableStudents.isEmpty()}" name="student" id="student">
+        <option th:each="s : ${availableStudents}" th:value="${s.id()}" th:text="${s.firstName()}+' '+${s.lastName()}+'('+#{register.nationalCode}+': '+${s.nationalCode()}+')'"></option>
+    </select>
+    <button th:if="${!availableStudents.isEmpty()}" id="register-student" style="background: none;border: solid white 2px;color: white;font-size: 25px" th:text="#{add.student}"></button>
+</div>
+<div class="w-100 df jcc">
+    <button class="w-50" id="remove-course" style="background-color: red;color: white;font-size: 30px" th:text="#{remove.course}"></button>
+</div>
+</body>
+<script>
+    const rPBtn = document.getElementById("register-professor");
+    const rSBtn = document.getElementById("register-student");
+    const rCBtn = document.getElementById("remove-course");
+    const courseId = document.getElementById("id").value
+    if (rPBtn) {
+        rPBtn.addEventListener("click", async function () {
+            const selected = document.getElementById("professor").value
+            await fetch("http://localhost:8080/api/v1/manager/course/add-professor", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    "courseId": courseId,
+                    "professorId": selected
+                })
+            }).then(res => {
+                if (res.ok) {
+                    window.location.reload();
+                }
+            })
+
+
+        })
+    }
+    if (rSBtn){
+    rSBtn.addEventListener("click",async function (){
+        const selectedStudent = document.getElementById("student").value
+        await fetch("http://localhost:8080/api/v1/manager/course/add-student",{
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify({
+                    "courseId":courseId,
+                    "studentId":selectedStudent
+                })
+            }).then(res => {
+                if (res.ok){
+                    window.location.reload();
+                }
+            })
+
+    })
+    }
+    if (rCBtn) {
+        rCBtn.addEventListener("click", async function () {
+            await fetch("http://localhost:8080/api/v1/manager/course/remove", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    "courseId": courseId,
+                })
+            }).then(res => {
+                if (res.ok) {
+                    window.location.replace("/manager/courses");
+                }
+            })
+
+        })
+    }
+</script>
+</html>

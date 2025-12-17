@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html
+        th:lang="${#locale.language}"
+        th:attr="dir=#{dir}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Register</title>
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+<body>
+<div class="w-100 jce df" style="font-size: 30px"><a class="lang" href="?lang=fa">فارسی</a>|<a class="lang" href="?lang=en">English</a></div>
+<div class="w-100 jcc df" style="font-size: 30px"><h1 th:text="#{login.welcome}"></h1></div>
+<div class="w-100 df jcc" style="font-size: 30px" th:text="#{register.register}"><h1></h1></div>
+<div class="df jcc">
+    <form id="form">
+        <label for="username" th:text="#{login.username}"></label><br>
+        <input type="text" id="username" name="username" required><br>
+
+        <label for="password" th:text="#{login.password}"></label><br>
+        <input type="password" id="password" name="password" required><br>
+
+        <label for="email" th:text="#{register.email}"></label><br>
+        <input type="email" id="email" name="email" required><br>
+
+        <label for="nationalCode" th:text="#{register.nationalCode}"></label><br>
+        <input type="text" id="nationalCode" name="nationalCode" required><br>
+
+        <label for="firstName" th:text="#{register.first.name}"></label><br>
+        <input type="text" id="firstName" name="firstName" required><br>
+
+        <label for="lastName" th:text="#{register.last.name}"></label><br>
+        <input type="text" id="lastName" name="lastName" required><br>
+
+        <label th:text="#{register.role}"></label><br>
+
+        <label for="role-p" th:text="#{register.role.p}"></label><br>
+        <input type="radio" id="role-p" name="role" value="PROFESSOR" required><br>
+
+        <label for="role-s" th:text="#{register.role.s}"></label><br>
+        <input type="radio" id="role-s" name="role" value="STUDENT" required><br>
+
+        <div class="w-100 df jcc">
+            <h3 th:utext="#{register.login.message}">
+
+            </h3>
+        </div>
+        <div class="w-100 df jcc">
+            <button class="sb" type="submit" th:text="#{register.register}"></button>
+        </div>
+    </form>
+</div>
+<div id="error-div" class="w-100 df jcc ed">
+
+</div>
+</body>
+<script>
+    const form = document.getElementById("form");
+    const usernameInp = document.getElementById("username");
+    const passwordInp = document.getElementById("password");
+    const emailInp = document.getElementById("email");
+    const nationalCodeInp = document.getElementById("nationalCode");
+    const firstNameInp = document.getElementById("firstName");
+    const lastNameInp = document.getElementById("lastName");
+    const errorDiv = document.getElementById("error-div");
+    const token = document.querySelector('meta[name="_csrf"]').content;
+    const headerName = document.querySelector('meta[name="_csrf_header"]').content;
+    form.addEventListener("submit",function (event){
+        event.preventDefault();
+        const roleInp = document.querySelector('input[name="role"]:checked');
+        const username = usernameInp.value
+        const password = passwordInp.value
+        const email = emailInp.value
+        const nationalCode = nationalCodeInp.value
+        const firstName = firstNameInp.value
+        const lastName = lastNameInp.value
+        const role = roleInp.value
+        let data = {username,password,email,nationalCode,firstName,lastName,role,"isEnable":false}
+        fetch("api/v1/register",{
+                method: "POST",
+                headers:{
+                    "Content-Type":"application/json",
+                    [headerName]:token
+                },
+                body:JSON.stringify(data)
+            }
+        ).then(async res => {
+            if (!res.ok) {
+                const errorBody = await res.json();
+
+                throw new Error(errorBody.message)
+            }
+            window.location.replace("/login?sfl")
+        })
+            .catch(error => {
+                errorDiv.innerText = error.message
+            })
+
+    });
+</script>
+</html>

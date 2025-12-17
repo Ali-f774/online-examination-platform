@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}"
+      th:attr="dir=#{dir}">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Course</title>
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+<body>
+<div class="w-100 jce df" style="font-size: 30px"><a class="lang" style="border: solid white 2px;padding: 5px" href="/manager/courses" th:text="#{courses}"></a><a class="lang" href="?lang=fa">فارسی</a>|<a class="lang" href="?lang=en">English</a></div>
+
+<div class="w-100 df jcc">
+    <h1 th:text="#{add.course}"></h1>
+</div>
+<div class="w-100 df jcc">
+    <form th:action="@{/manager/add-course}" method="post" enctype="multipart/form-data">
+        <label for="title" th:text="#{course.title}"></label><br>
+        <input id="title" name="title" type="text" required>
+        <br>
+        <label for="startDate" th:text="#{course.startDate}"></label><br>
+        <input id="startDate" name="startDate" type="date" required>
+        <br>
+        <label for="endDate" th:text="#{course.endDate}"></label><br>
+        <input id="endDate" name="endDate" type="date" required>
+        <br>
+        <label for="img" th:text="#{course.image}"></label><br>
+        <input id="img" name="image"  type="file" required>
+        <br>
+        <input type="submit" class="sb" th:value="#{create}">
+    </form>
+</div>
+</body>
+</html>
