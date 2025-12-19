@@ -3,8 +3,6 @@
       th:attr="dir=#{dir}">
 <head>
     <meta charset="UTF-8">
-    <meta name="_csrf" th:content="${_csrf.token}"/>
-    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>Edit User</title>
     <link rel="stylesheet" href="/css/global.css">
 </head>
@@ -58,8 +56,6 @@
     const lastNameInp = document.getElementById("lastName");
     const idInp = document.getElementById("id");
     const errorDiv = document.getElementById("error-div");
-    const token = document.querySelector('meta[name="_csrf"]').content;
-    const headerName = document.querySelector('meta[name="_csrf_header"]').content;
     form.addEventListener("submit",function (event) {
         event.preventDefault();
         const roleInp = document.querySelector('select[name="role"] option:checked');
@@ -73,8 +69,7 @@
         fetch("../api/v1/edit",{
                 method: "POST",
                 headers:{
-                    "Content-Type":"application/json",
-                    [headerName]:token
+                    "Content-Type":"application/json"
                 },
                 body:JSON.stringify(data)
             }

@@ -28,7 +28,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http){
         http
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/v1/edit","/manager/add-course","/manager/edit-course","/api/v1/manager/course/add-professor","/api/v1/manager/course/add-student","/api/v1/manager/course/remove"))
+        .csrf(AbstractHttpConfigurer::disable)
         .formLogin(AbstractHttpConfigurer::disable)
         .logout(AbstractHttpConfigurer::disable)
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

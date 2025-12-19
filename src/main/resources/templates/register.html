@@ -5,8 +5,6 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="_csrf" th:content="${_csrf.token}"/>
-    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>Register</title>
     <link rel="stylesheet" href="/css/global.css">
 </head>
@@ -65,8 +63,6 @@
     const firstNameInp = document.getElementById("firstName");
     const lastNameInp = document.getElementById("lastName");
     const errorDiv = document.getElementById("error-div");
-    const token = document.querySelector('meta[name="_csrf"]').content;
-    const headerName = document.querySelector('meta[name="_csrf_header"]').content;
     form.addEventListener("submit",function (event){
         event.preventDefault();
         const roleInp = document.querySelector('input[name="role"]:checked');
@@ -81,8 +77,7 @@
         fetch("api/v1/register",{
                 method: "POST",
                 headers:{
-                    "Content-Type":"application/json",
-                    [headerName]:token
+                    "Content-Type":"application/json"
                 },
                 body:JSON.stringify(data)
             }
