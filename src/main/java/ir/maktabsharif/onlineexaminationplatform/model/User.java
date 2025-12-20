@@ -46,7 +46,8 @@ public class User extends BaseModel {
     @Column(name = "last_name",nullable = false)
     private String lastName;
 
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<String> authorities;

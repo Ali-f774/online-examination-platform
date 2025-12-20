@@ -1,5 +1,6 @@
 package ir.maktabsharif.onlineexaminationplatform.dto;
 
+import ir.maktabsharif.onlineexaminationplatform.model.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -24,8 +25,8 @@ public record EditDto(
         @Length(min = 3,message = "{length.last.name}")
         String lastName,
 
-        @NotBlank
-        String role
+
+        Role role
 
 ) {
 
@@ -38,7 +39,5 @@ public record EditDto(
             firstName = firstName.trim();
         if (lastName != null)
             lastName = lastName.trim();
-        if (role != null)
-            role = role.trim().toUpperCase();
     }
 }

@@ -3,16 +3,16 @@
       th:attr="dir=#{dir}">
 <head>
     <meta charset="UTF-8">
-    <title>Pending Users</title>
+    <title>All Users</title>
     <link rel="stylesheet" href="/css/global.css">
 </head>
 <body>
 <div class="w-100 jce df" style="font-size: 30px"><a class="lang" style="border: solid white 2px;padding: 5px" href="/home" th:text="#{home}"></a><a class="lang" href="#" onclick="updateLang('fa');return false;" >فارسی</a>|<a class="lang" href="#" onclick="updateLang('en');return false;">English</a></div>
 <div class="df w-100 jcc">
-    <h1 th:text="#{pending.users}"></h1>
+    <h1 th:text="#{all.users}"></h1>
 </div>
 <div class="w-100 df jcc">
-    <form th:action="@{/manager/search}" method="get" th:switch="${dto.role()}">
+    <form th:action="@{/manager/search/all}" method="get" th:switch="${dto.role()}">
         <button type="submit" style="font-size: 20px;background: none;border: solid white 1px;color: white" th:text="#{search}"></button>
         <input type="text" name="firstName" th:value="${dto.firstName()}" th:placeholder="#{register.first.name}">
         <input type="text" name="lastName" th:value="${dto.lastName()}" th:placeholder="#{register.last.name}">
@@ -47,8 +47,8 @@
             <th th:text="#{register.last.name}"></th>
             <th th:text="#{pending.role}"></th>
             <th th:text="#{pending.edit}"></th>
-            <th th:text="#{pending.approve}"></th>
-            <th th:text="#{pending.reject}"></th>
+            <th th:text="#{user.status}"></th>
+            <th th:text="#{delete}"></th>
 
         </tr>
         <tr th:each="user : ${users}" th:switch="${user.role()}">
@@ -59,9 +59,10 @@
             <td th:text="${user.lastName()}"></td>
             <td th:case="'PROFESSOR'" th:text="#{register.role.p}"></td>
             <td th:case="'STUDENT'" th:text="#{register.role.s}"></td>
-            <td class="apply-changes"><a style="text-decoration: none;color: black" th:href="'/manager/edit?id='+${user.id()}" th:text="#{pending.edit}"></a></td>
-            <td class="approve"><a style="text-decoration: none;color: white" th:href="'/manager/approve?id='+${user.id()}" th:onclick="'return confirm('+#{approve.message}+')'" th:text="#{pending.approve}"></a></td>
-            <td class="reject"><a style="text-decoration: none;color: white" th:href="'/manager/reject?id=  '+${user.id()}" th:onclick="'return confirm('+#{reject.message}+')'" th:text="#{pending.reject}"></a></td>
+            <td class="apply-changes"><a style="text-decoration: none;color: black" th:href="'/manager/edit-all?id='+${user.id()}" th:text="#{pending.edit}"></a></td>
+            <td th:if="${user.isEnable()}">Approved</td>
+            <td th:if="${!user.isEnable()}">Pending</td>
+            <td class="reject"><a style="text-decoration: none;color: white" th:href="'/manager/remove?id=  '+${user.id()}" th:onclick="'return confirm('+#{delete.message}+')'" th:text="#{delete}"></a></td>
         </tr>
     </table>
 </div>

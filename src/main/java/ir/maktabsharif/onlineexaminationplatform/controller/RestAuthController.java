@@ -4,10 +4,7 @@ import ir.maktabsharif.onlineexaminationplatform.dto.EditDto;
 import ir.maktabsharif.onlineexaminationplatform.dto.LoginReq;
 import ir.maktabsharif.onlineexaminationplatform.dto.RegisterReq;
 import ir.maktabsharif.onlineexaminationplatform.mapper.DataMapper;
-import ir.maktabsharif.onlineexaminationplatform.model.Course;
-import ir.maktabsharif.onlineexaminationplatform.model.Professor;
-import ir.maktabsharif.onlineexaminationplatform.model.Student;
-import ir.maktabsharif.onlineexaminationplatform.model.User;
+import ir.maktabsharif.onlineexaminationplatform.model.*;
 import ir.maktabsharif.onlineexaminationplatform.service.CourseService;
 import ir.maktabsharif.onlineexaminationplatform.service.UserService;
 import ir.maktabsharif.onlineexaminationplatform.util.JwtUtil;
@@ -60,9 +57,9 @@ public class RestAuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterReq registerReq){
         User user = null;
-        if (registerReq.role().equals("PROFESSOR"))
+        if (registerReq.role().equals(Role.PROFESSOR))
             user = mapper.registerDtoToProfessor(registerReq);
-        if (registerReq.role().equals("STUDENT"))
+        if (registerReq.role().equals(Role.STUDENT))
             user = mapper.registerDtoToStudent(registerReq);
         user.setPassword(encoder.encode(user.getPassword()));
         service.addOrUpdate(user);

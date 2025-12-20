@@ -3,6 +3,7 @@ package ir.maktabsharif.onlineexaminationplatform.service.impl;
 import ir.maktabsharif.onlineexaminationplatform.dto.EditDto;
 import ir.maktabsharif.onlineexaminationplatform.dto.SearchDto;
 import ir.maktabsharif.onlineexaminationplatform.model.Professor;
+import ir.maktabsharif.onlineexaminationplatform.model.Role;
 import ir.maktabsharif.onlineexaminationplatform.model.Student;
 import ir.maktabsharif.onlineexaminationplatform.model.User;
 import ir.maktabsharif.onlineexaminationplatform.repository.UserRepository;
@@ -53,12 +54,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<@NonNull User> findAllActiveProfessors() {
-        return repository.findAllByRoleAndIsEnable("PROFESSOR",true);
+        return repository.findAllByRoleAndIsEnable(Role.PROFESSOR,true);
     }
 
     @Override
     public List<@NonNull User> findAllActiveStudents() {
-        return repository.findAllByRoleAndIsEnable("STUDENT",true);
+        return repository.findAllByRoleAndIsEnable(Role.STUDENT,true);
     }
 
     @Override
@@ -69,7 +70,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User update(User user, EditDto dto) {
         User oldUser = findById(dto.id());
-        if (user instanceof Professor && dto.role().equals("STUDENT")){
+        if (user instanceof Professor && dto.role().equals(Role.STUDENT)){
             repository.delete(user);
             Student student = Student.builder()
                     .username(oldUser.getUsername()).
@@ -79,11 +80,11 @@ public class UserServiceImpl implements UserService {
                     nationalCode(dto.nationalCode()).
                     firstName(dto.firstName()).
                     lastName(dto.lastName()).
-                    role("STUDENT")
+                    role(Role.STUDENT)
                     .build();
             return addOrUpdate(student);
         }
-        if (user instanceof Student && dto.role().equals("PROFESSOR")){
+        if (user instanceof Student && dto.role().equals(Role.PROFESSOR)){
             repository.delete(user);
             Professor professor = Professor.builder()
                     .username(oldUser.getUsername()).
@@ -93,7 +94,7 @@ public class UserServiceImpl implements UserService {
                     nationalCode(dto.nationalCode()).
                     firstName(dto.firstName()).
                     lastName(dto.lastName()).
-                    role("PROFESSOR")
+                    role(Role.PROFESSOR)
                     .build();
             return addOrUpdate(professor);
         }
@@ -107,6 +108,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<@NonNull User> findAllBySearch(SearchDto dto, Pageable pageable) {
         return repository.findAll(UserSpecification.searchUsers(dto),pageable);
+    }
+
+    @Override
+    public Page<@NonNull User> findAllUsersBySearch(SearchDto dto, Pageable pageable) {
+        return repository.findAll(UserSpecification.searchAllUsers(dto),pageable);
     }
 
     @Override

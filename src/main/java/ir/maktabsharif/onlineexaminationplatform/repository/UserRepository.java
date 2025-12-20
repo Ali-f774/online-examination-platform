@@ -1,5 +1,6 @@
 package ir.maktabsharif.onlineexaminationplatform.repository;
 
+import ir.maktabsharif.onlineexaminationplatform.model.Role;
 import ir.maktabsharif.onlineexaminationplatform.model.User;
 import lombok.NonNull;
 import org.springframework.data.domain.Page;
@@ -16,7 +17,7 @@ public interface UserRepository extends JpaRepository<User,Long>, JpaSpecificati
 
     Optional<User> findByUsername(String username);
 
-    List<@NonNull User> findAllByRoleAndIsEnable(String role, Boolean isEnable);
+    List<@NonNull User> findAllByRoleAndIsEnable(Role role, Boolean isEnable);
     Page<@NonNull User> findAllByIsEnableIsFalse(Pageable pageable);
 
     @Query(value = """

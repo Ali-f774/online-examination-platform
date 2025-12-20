@@ -1,6 +1,7 @@
 package ir.maktabsharif.onlineexaminationplatform.config;
 
 import ir.maktabsharif.onlineexaminationplatform.model.Professor;
+import ir.maktabsharif.onlineexaminationplatform.model.Role;
 import ir.maktabsharif.onlineexaminationplatform.model.Student;
 import ir.maktabsharif.onlineexaminationplatform.model.User;
 import ir.maktabsharif.onlineexaminationplatform.service.CourseService;
@@ -31,7 +32,7 @@ public class DataInitializer implements CommandLineRunner {
                 .lastName("Faraji")
                 .isEnable(true)
                 .nationalCode("0200374397")
-                .role("MANAGER")
+                .role(Role.MANAGER)
                 .build()
         );
         service.addOrUpdate(Professor.builder()
@@ -42,7 +43,7 @@ public class DataInitializer implements CommandLineRunner {
                 .lastName("Ahmadi")
                 .isEnable(false)
                 .nationalCode("0200374398")
-                .role("PROFESSOR")
+                .role(Role.PROFESSOR)
                 .build()
         );
         service.addOrUpdate(Student.builder()
@@ -53,7 +54,7 @@ public class DataInitializer implements CommandLineRunner {
                 .lastName("Jafari")
                 .isEnable(false)
                 .nationalCode("0200374399")
-                .role("STUDENT")
+                .role(Role.STUDENT)
                 .build()
         );
         Student ahmad = Student.builder()
@@ -64,7 +65,7 @@ public class DataInitializer implements CommandLineRunner {
                 .lastName("Taheri")
                 .isEnable(true)
                 .nationalCode("0200374400")
-                .role("STUDENT")
+                .role(Role.STUDENT)
                 .build();
         service.addOrUpdate(ahmad);
         Student asghar = Student.builder()
@@ -75,7 +76,7 @@ public class DataInitializer implements CommandLineRunner {
                 .lastName("Asghari")
                 .isEnable(true)
                 .nationalCode("0200374401")
-                .role("STUDENT")
+                .role(Role.STUDENT)
                 .build();
 
         service.addOrUpdate(asghar);
@@ -87,7 +88,7 @@ public class DataInitializer implements CommandLineRunner {
                 .lastName("Akbari")
                 .isEnable(true)
                 .nationalCode("0200374402")
-                .role("STUDENT")
+                .role(Role.STUDENT)
                 .build();
 
         service.addOrUpdate(zahra);
@@ -99,7 +100,7 @@ public class DataInitializer implements CommandLineRunner {
                 .lastName("Khaki")
                 .isEnable(true)
                 .nationalCode("0200374444")
-                .role("PROFESSOR")
+                .role(Role.PROFESSOR)
                 .build();
         service.addOrUpdate(mehran);
 

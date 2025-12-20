@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}"
+      th:attr="dir=#{dir}">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit User</title>
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+<body>
+<div class="w-100 jce df" style="font-size: 30px"><a class="lang" style="border: solid white 2px;padding: 5px" href="/manager/all-users" th:text="#{back}"></a><a class="lang" th:href="'?lang=fa'+'&id='+${user.id()}">فارسی</a>|<a class="lang" th:href="'?lang=en'+'&id='+${user.id()}">English</a></div>
+<div class="w-100 df jcc">
+    <h1 th:text="#{pending.edit}" style=""></h1>
+</div>
+<div class="w-100 df jcc">
+    <form id="form" th:switch="${user.role()}">
+        <input type="hidden" name="id" id="id" th:value="${user.id()}">
+
+        <label for="email" th:text="#{register.email}"></label><br>
+        <input name="email" type="email" id="email" th:value="${user.email()}"/><br>
+
+        <label for="nationalCode" th:text="#{register.nationalCode}"></label><br>
+        <input name="nationalCode" id="nationalCode" type="text" th:value="${user.nationalCode()}"/><br>
+
+        <label for="firstName" th:text="#{register.first.name}"></label><br>
+        <input name="firstName" id="firstName" type="text" th:value="${user.firstName()}"/><br>
+
+        <label for="lastName" th:text="#{register.last.name}"></label><br>
+        <input name="lastName" id="lastName" type="text" th:value="${user.lastName()}"/><br>
+
+        <label for="role" th:text="#{pending.role}"></label><br>
+        <select name="role" id="role" style="font-size: 30px">
+            <selectBody th:case="'PROFESSOR'">
+                <option value="PROFESSOR" th:text="#{register.role.p}"></option>
+                <option value="STUDENT" th:text="#{register.role.s}"></option>
+            </selectBody>
+            <selectBody th:case="'STUDENT'">
+                <option value="STUDENT" th:text="#{register.role.s}"></option>
+                <option value="PROFESSOR" th:text="#{register.role.p}"></option>
+            </selectBody>
+        </select>
+        <div class="w-100 df jcc">
+            <button class="sb" type="submit" th:text="#{pending.edit}"></button>
+        </div>
+    </form>
+</div>
+<div id="error-div" class="w-100 df jcc ed">
+
+</div>
+</body>
+
+<script>
+    const form = document.getElementById("form");
+    const emailInp = document.getElementById("email");
+    const nationalCodeInp = document.getElementById("nationalCode");
+    const firstNameInp = document.getElementById("firstName");
+    const lastNameInp = document.getElementById("lastName");
+    const idInp = document.getElementById("id");
+    const errorDiv = document.getElementById("error-div");
+    form.addEventListener("submit",function (event) {
+        event.preventDefault();
+        const roleInp = document.querySelector('select[name="role"] option:checked');
+        const email = emailInp.value
+        const nationalCode = nationalCodeInp.value
+        const firstName = firstNameInp.value
+        const lastName = lastNameInp.value
+        const id = idInp.value
+        const role = roleInp.value
+        let data = {id,email,nationalCode,firstName,lastName,role}
+        fetch("../api/v1/edit",{
+                method: "POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify(data)
+            }
+        ).then(async res => {
+            if (!res.ok) {
+                const errorBody = await res.json();
+
+                throw new Error(errorBody.message)
+            }
+
+            window.location.replace("/manager/all-users")
+        })
+            .catch(error => {
+                errorDiv.innerText = error.message
+            })
+
+    })
+</script>
+</html>

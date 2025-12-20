@@ -1,5 +1,6 @@
 package ir.maktabsharif.onlineexaminationplatform.controller;
 
+import ir.maktabsharif.onlineexaminationplatform.model.Role;
 import ir.maktabsharif.onlineexaminationplatform.model.User;
 import ir.maktabsharif.onlineexaminationplatform.service.UserService;
 import jakarta.servlet.http.Cookie;
@@ -41,13 +42,11 @@ public class AuthController {
 
        User user = service.findByUsername(principal.getName());
        return switch (user.getRole()){
-            case "MANAGER" -> "manager-dashboard";
+            case MANAGER -> "manager-dashboard";
 
-            case "PROFESSOR" -> "professor-dashboard";
+            case PROFESSOR -> "professor-dashboard";
 
-            case "STUDENT" -> "student-dashboard";
-
-            default -> "redirect:/login";
+            case STUDENT -> "student-dashboard";
        };
     }
 

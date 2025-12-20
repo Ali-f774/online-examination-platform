@@ -44,10 +44,29 @@ public class ManagerController {
     @GetMapping("/pending-users")
     @PreAuthorize("hasRole('MANAGER')")
     public String pendingUsers(Pageable pageable, Model model){
-        List<UserDto> list = userService.findAllPendingUsers(pageable).get().map(mapper::UserToDto).toList();
-        model.addAttribute("dto",new SearchDto("","","",""));
+        SearchDto dto = new SearchDto("", "", "", "");
+        List<UserDto> list = userService.findAllBySearch(dto,pageable).get().map(mapper::UserToDto).toList();
+        model.addAttribute("dto",dto);
         model.addAttribute("users",list);
         return "pending-users";
+    }
+
+    @GetMapping("/all-users")
+    @PreAuthorize("hasRole('MANAGER')")
+    public String allUsers(Pageable pageable, Model model){
+        SearchDto dto = new SearchDto("", "", "", "");
+        List<UserDto> list = userService.findAllUsersBySearch(dto,pageable).get().map(mapper::UserToDto).toList();
+        model.addAttribute("dto",dto);
+        model.addAttribute("users",list);
+        return "all-users";
+    }
+    @PreAuthorize("hasRole('MANAGER')")
+    @GetMapping("/search/all")
+    public String searchAll(@Valid @ModelAttribute SearchDto dto,Pageable pageable,Model model){
+        List<UserDto> list = userService.findAllUsersBySearch(dto,pageable).stream().map(mapper::UserToDto).toList();
+        model.addAttribute("dto",dto);
+        model.addAttribute("users",list);
+        return "all-users";
     }
 
     @PreAuthorize("hasRole('MANAGER')")
@@ -101,6 +120,13 @@ public class ManagerController {
         model.addAttribute("user",mapper.UserToDto(userService.findById(id)));
         return "edit-user";
     }
+    @Transactional
+    @GetMapping("/edit-all")
+    @PreAuthorize("hasRole('MANAGER')")
+    public String editUserAll(@RequestParam Long id,Model model){
+        model.addAttribute("user",mapper.UserToDto(userService.findById(id)));
+        return "edit-all-user";
+    }
 
     @Transactional
     @GetMapping("/approve")
@@ -121,6 +147,13 @@ public class ManagerController {
         userService.deleteById(id);
         emailService.sendEmail(user.getEmail(),user.getFirstName()+" "+user.getLastName(),false);
         return "redirect:/manager/pending-users";
+    }
+    @Transactional
+    @GetMapping("/remove")
+    @PreAuthorize("hasRole('MANAGER')")
+    public String rejectAllUser(@RequestParam Long id){
+        userService.deleteById(id);
+        return "redirect:/manager/all-users";
     }
 
 

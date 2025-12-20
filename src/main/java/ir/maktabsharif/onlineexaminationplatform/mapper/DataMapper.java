@@ -18,7 +18,7 @@ public abstract class DataMapper {
 
     public abstract Student registerDtoToStudent(RegisterReq registerReq);
 
-    public abstract UserDto UserToDto(User u);
+    public abstract UserDto UserToDto(User user);
 
     public abstract CourseDto courseToDto(Course course);
 

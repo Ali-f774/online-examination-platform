@@ -20,7 +20,10 @@ public interface UserService extends CrudService<User>{
     Page<@NonNull User> findAllPendingUsers(Pageable pageable);
 
     User update(User user,EditDto dto);
+
     Page<@NonNull User> findAllBySearch(SearchDto dto,Pageable pageable);
+
+    Page<@NonNull User> findAllUsersBySearch(SearchDto dto,Pageable pageable);
 
     List<User> findAllStudentsNotRegisteredInCourse(Long courseId);
 

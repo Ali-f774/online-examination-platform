@@ -1,5 +1,7 @@
 package ir.maktabsharif.onlineexaminationplatform.dto;
 
+import ir.maktabsharif.onlineexaminationplatform.model.Role;
+
 public record UserDto(
         Long id,
         String username,
@@ -7,6 +9,7 @@ public record UserDto(
         String nationalCode,
         String firstName,
         String lastName,
-        String role
+        String role,
+        Boolean isEnable
 ) {
 }
