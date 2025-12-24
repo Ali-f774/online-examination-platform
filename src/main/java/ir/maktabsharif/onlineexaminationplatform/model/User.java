@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.io.Serializable;
 import java.util.Set;
 
 @Entity
@@ -17,7 +18,7 @@ import java.util.Set;
 @Table(name = "users_table")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "type")
-public class User extends BaseModel {
+public class User extends BaseModel{
 
     @NotBlank
     @Column(unique = true,nullable = false)
@@ -49,8 +50,6 @@ public class User extends BaseModel {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    private Set<String> authorities;
 
 
 }

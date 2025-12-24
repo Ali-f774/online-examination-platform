@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}"
+      th:attr="dir=#{dir}">
+<head>
+    <meta charset="UTF-8">
+    <title>Professor Courses</title>
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+<body>
+<div class="w-100 jce df" style="font-size: 30px"><a class="lang" style="border: solid white 2px;padding: 5px" href="/home" th:text="#{home}"></a><a class="lang" href="?lang=fa">فارسی</a>|<a class="lang" href="?lang=en">English</a></div>
+<div class="df w-100 jcc">
+    <h1 th:text="#{courses}" style="font-size: 50px"></h1>
+</div>
+<div th:if="${courses.isEmpty()}" class="w-100 df jcc">
+    <h1 th:text="#{coursesEmpty}"></h1>
+</div>
+<div th:if="${!courses.isEmpty()}" th:each="course : ${courses}" class="w-100 dg jcc h-50">
+    <div class="w-100 df jcc h-100">
+        <div class="w-100 df h-100 jcs" style="border-top: solid white 2px;">
+            <img th:src="'data:image/jpeg;base64,'+${course.image()}" class="h-100 w-50" th:alt="#{course.image}">
+            <div class="h-100 w-50" style="font-size: 20px">
+                <h3 style="display: inline-block" th:text="#{course.title}"></h3><h3 style="display: inline-block;margin-left: 15px" th:text="${course.title()}"></h3><br>
+                <h3 style="display: inline-block" th:text="#{course.startDate}"></h3><h3 style="display: inline-block;margin-left: 15px" th:text="${course.startDate()}"></h3><br>
+                <h3 style="display: inline-block" th:text="#{course.endDate}"></h3><h3 style="display: inline-block;margin-left: 15px" th:text="${course.endDate()}"></h3>
+                <br>
+                <h3 style="display: inline-block;border: solid white 2px"><a th:href="'/professor/course-exams?id='+${course.id()}" class="lang" th:text="#{details}"></a></h3>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

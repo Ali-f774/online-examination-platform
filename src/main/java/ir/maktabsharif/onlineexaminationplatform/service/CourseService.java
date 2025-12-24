@@ -8,4 +8,5 @@ import org.springframework.data.domain.Pageable;
 public interface CourseService extends CrudService<Course>{
 
     Page<@NonNull Course> findAllCourses(Pageable pageable);
+    Boolean validProfessor(Long id,Long professorId);
 }

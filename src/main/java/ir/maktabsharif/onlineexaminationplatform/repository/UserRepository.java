@@ -25,4 +25,6 @@ public interface UserRepository extends JpaRepository<User,Long>, JpaSpecificati
         (select students_id from course_students where courses_id = :courseId)
         """,nativeQuery = true)
     List<User> findAllStudentsNotRegisteredInCourse(@Param("courseId") Long courseId);
+
+
 }

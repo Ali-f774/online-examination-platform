@@ -6,6 +6,7 @@ import jakarta.persistence.ManyToMany;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.io.Serializable;
 import java.util.Set;
 
 @Entity
@@ -19,5 +20,8 @@ public class Student extends User{
 
     @ManyToMany(mappedBy = "students")
     private Set<Course> courses;
+
+    @ManyToMany(mappedBy = "students")
+    private Set<Exam> exams;
 
 }

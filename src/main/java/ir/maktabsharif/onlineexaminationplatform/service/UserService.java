@@ -1,5 +1,6 @@
 package ir.maktabsharif.onlineexaminationplatform.service;
 
+import ir.maktabsharif.onlineexaminationplatform.dto.DetailsUserDto;
 import ir.maktabsharif.onlineexaminationplatform.dto.EditDto;
 import ir.maktabsharif.onlineexaminationplatform.dto.SearchDto;
 import ir.maktabsharif.onlineexaminationplatform.model.User;
@@ -27,4 +28,5 @@ public interface UserService extends CrudService<User>{
 
     List<User> findAllStudentsNotRegisteredInCourse(Long courseId);
 
+    DetailsUserDto findDtoByUsername(String username);
 }

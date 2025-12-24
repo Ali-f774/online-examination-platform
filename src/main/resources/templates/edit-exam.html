@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}"
+      th:attr="dir=#{dir}">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Exam</title>
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+<body>
+<div class="w-100 jce df" style="font-size: 30px"><a class="lang" style="border: solid white 2px;padding: 5px" href="#" onclick="back();return false;" th:text="#{back}"></a><a class="lang" href="#" onclick="updateLang('fa');return false;" >فارسی</a>|<a class="lang" href="#" onclick="updateLang('en');return false;">English</a></div>
+<div class="w-100 df jcc">
+    <h1 th:text="#{edit.exam}"></h1>
+</div>
+<div class="w-100 df jcc">
+    <form id="form">
+        <input type="hidden" id="id" th:value="${exam.id()}">
+        <input type="hidden" id="courseId" th:value="${courseId}">
+        <label for="title" th:text="#{title}" ></label><br>
+        <input type="text" id="title" th:value="${exam.title()}" required><br>
+        <label for="description" th:text="#{description}"></label><br>
+        <textarea id="description" cols="30" rows="10" th:text="${exam.description()}"></textarea><br>
+        <label for="time" th:text="#{time}">Time</label><br>
+        <input type="number" id="time" min="1" th:value="${exam.time()}" required><br>
+        <div class="w-100 df jcc">
+            <button class="sb" type="submit" th:text="#{pending.edit}"></button>
+        </div>
+    </form>
+</div>
+<div id="error-div" class="w-100 df jcc ed">
+
+</div>
+</body>
+<script>
+    const form = document.getElementById("form");
+    const titleInp = document.getElementById("title");
+    const descriptionInp = document.getElementById("description");
+    const timeInp = document.getElementById("time");
+    const courseId = document.getElementById("courseId").value;
+    const examId = document.getElementById("id");
+    const errorDiv = document.getElementById("error-div");
+    form.addEventListener("submit",function (event) {
+        event.preventDefault();
+        const id = examId.value;
+        const title = titleInp.value;
+        const description = descriptionInp.value;
+        const time = timeInp.value;
+        let data = {id,title,description,time}
+        fetch("/api/v1/professor/edit-exam",{
+                method: "POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify(data)
+            }
+        ).then(async res => {
+            if (!res.ok) {
+                const errorBody = await res.json();
+
+                throw new Error(errorBody.message)
+            }
+
+            window.location.replace(`/professor/course-exams?id=`+courseId)
+        })
+            .catch(error => {
+                errorDiv.innerText = error.message
+            })
+
+    })
+    function back(){
+        window.location.replace(`/professor/course-exams?id=`+courseId)
+    }
+    function updateLang (lang){
+        let url = new URL(window.location.href)
+        url.searchParams.set('lang',lang);
+        window.location.href = url.toString();
+    }
+</script>
+</html>

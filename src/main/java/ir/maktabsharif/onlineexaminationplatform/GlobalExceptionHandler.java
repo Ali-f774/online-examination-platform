@@ -1,5 +1,6 @@
 package ir.maktabsharif.onlineexaminationplatform;
 
+import ir.maktabsharif.onlineexaminationplatform.exception.DoubleExamException;
 import ir.maktabsharif.onlineexaminationplatform.util.I18NUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
@@ -47,7 +48,7 @@ public class GlobalExceptionHandler {
         return Map.of("message",i18NUtils.getMessage("disable.account"));
     }
     @ExceptionHandler(DataIntegrityViolationException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> doubleData(DataIntegrityViolationException e){
         String message = "";
         String rootCase = (e.getRootCause() != null) ? e.getRootCause().getMessage() : e.getMessage();
@@ -62,4 +63,9 @@ public class GlobalExceptionHandler {
         return Map.of("message",message);
     }
 
+    @ExceptionHandler(DoubleExamException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> doubleExam(DoubleExamException e){
+        return Map.of("message",i18NUtils.getMessage("double.exam"));
+    }
 }

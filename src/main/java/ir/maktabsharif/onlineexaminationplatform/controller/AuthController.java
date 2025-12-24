@@ -1,11 +1,13 @@
 package ir.maktabsharif.onlineexaminationplatform.controller;
 
+import ir.maktabsharif.onlineexaminationplatform.dto.DetailsUserDto;
 import ir.maktabsharif.onlineexaminationplatform.model.Role;
 import ir.maktabsharif.onlineexaminationplatform.model.User;
 import ir.maktabsharif.onlineexaminationplatform.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,13 +42,15 @@ public class AuthController {
        if (principal == null)
             return "redirect:/login";
 
-       User user = service.findByUsername(principal.getName());
-       return switch (user.getRole()){
-            case MANAGER -> "manager-dashboard";
+       DetailsUserDto user = service.findDtoByUsername(principal.getName());
+       return switch (user.getAuthorities().get(0)){
+            case "MANAGER" -> "manager-dashboard";
 
-            case PROFESSOR -> "professor-dashboard";
+            case "PROFESSOR" -> "professor-dashboard";
 
-            case STUDENT -> "student-dashboard";
+            case "STUDENT" -> "student-dashboard";
+
+            default -> throw new AccessDeniedException("Access Denied");
        };
     }
 

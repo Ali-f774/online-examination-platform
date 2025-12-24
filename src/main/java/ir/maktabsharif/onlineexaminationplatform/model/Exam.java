@@ -1,12 +1,10 @@
 package ir.maktabsharif.onlineexaminationplatform.model;
 
-import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.util.Set;
 
 @Entity
@@ -15,17 +13,24 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class Course extends BaseModel {
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {
+        "title",
+        "course_id",
+        "professor_id"
+}))
+public class Exam extends BaseModel {
 
+    @Column(nullable = false)
     private String title;
 
-    private LocalDate startDate;
+    @Column(nullable = false)
+    private String description;
 
-    private LocalDate endDate;
+    @Column(nullable = false)
+    private Integer time; //Minutes
 
-
-    @Lob
-    private String image;
+    @ManyToOne
+    private Course course;
 
     @ManyToOne
     private Professor professor;
@@ -33,6 +38,4 @@ public class Course extends BaseModel {
     @ManyToMany
     private Set<Student> students;
 
-    @OneToMany(mappedBy = "course",cascade = CascadeType.REMOVE)
-    private Set<Exam> exams;
 }

@@ -1,6 +1,6 @@
 package ir.maktabsharif.onlineexaminationplatform.service;
 
-import ir.maktabsharif.onlineexaminationplatform.model.User;
+import ir.maktabsharif.onlineexaminationplatform.dto.DetailsUserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,11 +19,9 @@ public class CustomUserDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = service.findByUsername(username);
+        DetailsUserDto user = service.findDtoByUsername(username);
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().toString()));
-        user.getAuthorities().forEach(a -> authorities.add(new SimpleGrantedAuthority(a)));
-
+        user.getAuthorities().forEach(s -> authorities.add(new SimpleGrantedAuthority("ROLE_"+s)));
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),

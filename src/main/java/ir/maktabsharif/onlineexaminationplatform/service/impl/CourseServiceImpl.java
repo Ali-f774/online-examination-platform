@@ -36,11 +36,16 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public void deleteById(@Min(1) Long id) {
-        repository.delete(findById(id));
+        repository.deleteById(id);
     }
 
     @Override
     public Page<@NonNull Course> findAllCourses(@NotNull Pageable pageable) {
         return repository.findAll(pageable);
+    }
+
+    @Override
+    public Boolean validProfessor(Long id, Long professorId) {
+        return repository.existsByIdAndProfessor_Id(id,professorId);
     }
 }

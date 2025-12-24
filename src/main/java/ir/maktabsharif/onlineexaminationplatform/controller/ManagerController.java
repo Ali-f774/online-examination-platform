@@ -37,8 +37,8 @@ import java.util.List;
 public class ManagerController {
 
     private final UserService userService;
-    private final CourseService courseService;
     private final DataMapper mapper;
+    private final CourseService courseService;
     private final EmailService emailService;
 
     @GetMapping("/pending-users")
@@ -69,10 +69,11 @@ public class ManagerController {
         return "all-users";
     }
 
+    @Transactional
     @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/courses")
-    public String courses(Model model,Pageable pageable){
-        List<CourseDto> list = courseService.findAllCourses(pageable)
+    public String courses(Model model){
+        List<CourseDto> list = courseService.findAll()
                 .stream()
                 .map(course -> {
                     CourseDto dto = mapper.courseToDto(course);
@@ -92,6 +93,7 @@ public class ManagerController {
         model.addAttribute("courses",list);
         return "courses";
     }
+
 
     @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/add-course")
@@ -166,6 +168,7 @@ public class ManagerController {
         return "pending-users";
     }
 
+    @Transactional
     @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/course-details")
     public String courseDetails(@RequestParam Long id,Model model){
