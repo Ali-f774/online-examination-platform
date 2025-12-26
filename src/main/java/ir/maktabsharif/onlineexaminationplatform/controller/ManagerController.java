@@ -118,7 +118,8 @@ public class ManagerController {
     @Transactional
     @GetMapping("/edit")
     @PreAuthorize("hasRole('MANAGER')")
-    public String editUser(@RequestParam Long id,Model model){
+    public String
+    editUser(@RequestParam Long id,Model model){
         model.addAttribute("user",mapper.UserToDto(userService.findById(id)));
         return "edit-user";
     }

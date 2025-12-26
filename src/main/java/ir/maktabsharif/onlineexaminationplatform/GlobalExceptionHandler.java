@@ -1,6 +1,7 @@
 package ir.maktabsharif.onlineexaminationplatform;
 
 import ir.maktabsharif.onlineexaminationplatform.exception.DoubleExamException;
+import ir.maktabsharif.onlineexaminationplatform.exception.DoubleUsernameException;
 import ir.maktabsharif.onlineexaminationplatform.util.I18NUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
@@ -61,6 +62,11 @@ public class GlobalExceptionHandler {
 
 
         return Map.of("message",message);
+    }
+    @ExceptionHandler(DoubleUsernameException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String,String> doubleUsername(){
+        return Map.of("message",i18NUtils.getMessage("double.username"));
     }
 
     @ExceptionHandler(DoubleExamException.class)

@@ -62,7 +62,7 @@
             <td class="apply-changes"><a style="text-decoration: none;color: black" th:href="'/manager/edit-all?id='+${user.id()}" th:text="#{pending.edit}"></a></td>
             <td th:if="${user.isEnable()}">Approved</td>
             <td th:if="${!user.isEnable()}">Pending</td>
-            <td class="reject"><a style="text-decoration: none;color: white" th:href="'/manager/remove?id=  '+${user.id()}" th:onclick="'return confirm('+#{delete.message}+')'" th:text="#{delete}"></a></td>
+            <td class="reject"><a style="text-decoration: none;color: white" th:href="'/manager/remove?id='+${user.id()}" th:onclick="'return confirm('+#{delete.message}+')'" th:text="#{delete}"></a></td>
         </tr>
     </table>
 </div>

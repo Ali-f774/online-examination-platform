@@ -28,5 +28,5 @@ public interface UserService extends CrudService<User>{
 
     List<User> findAllStudentsNotRegisteredInCourse(Long courseId);
 
-    DetailsUserDto findDtoByUsername(String username);
+//    DetailsUserDto findDtoByUsername(String username);
 }

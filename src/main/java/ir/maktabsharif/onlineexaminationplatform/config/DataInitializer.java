@@ -20,13 +20,11 @@
 //
 //    private final UserService service;
 //    private final CourseService courseService;
-//    private final PasswordEncoder encoder;
 //
 //    @Override
 //    public void run(String... args) throws Exception {
 //        service.addOrUpdate(User.builder()
-//                .username("Ali")
-//                .password(encoder.encode("1234"))
+//                .username("ali")
 //                .email("alifaraji773@gmail.com")
 //                .firstName("Ali")
 //                .lastName("Faraji")
@@ -37,7 +35,6 @@
 //        );
 //        service.addOrUpdate(Professor.builder()
 //                .username("sara")
-//                .password(encoder.encode("1234"))
 //                .email("sara773@gmail.com")
 //                .firstName("Sara")
 //                .lastName("Ahmadi")
@@ -46,20 +43,9 @@
 //                .role(Role.PROFESSOR)
 //                .build()
 //        );
-//        service.addOrUpdate(Student.builder()
-//                .username("reza")
-//                .password(encoder.encode("1234"))
-//                .email("reza773@gmail.com")
-//                .firstName("Reza")
-//                .lastName("Jafari")
-//                .isEnable(false)
-//                .nationalCode("0200374399")
-//                .role(Role.STUDENT)
-//                .build()
-//        );
+//
 //        Student ahmad = Student.builder()
 //                .username("ahmad")
-//                .password(encoder.encode("1234"))
 //                .email("ahmad773@gmail.com")
 //                .firstName("Ahmad")
 //                .lastName("Taheri")
@@ -70,7 +56,6 @@
 //        service.addOrUpdate(ahmad);
 //        Student asghar = Student.builder()
 //                .username("asghar")
-//                .password(encoder.encode("1234"))
 //                .email("asghar773@gmail.com")
 //                .firstName("Asghar")
 //                .lastName("Asghari")
@@ -82,7 +67,6 @@
 //        service.addOrUpdate(asghar);
 //        Student zahra = Student.builder()
 //                .username("zahra")
-//                .password(encoder.encode("1234"))
 //                .email("zahra773@gmail.com")
 //                .firstName("Zahra")
 //                .lastName("Akbari")
@@ -94,7 +78,6 @@
 //        service.addOrUpdate(zahra);
 //        Professor mehran = Professor.builder()
 //                .username("mehran")
-//                .password(encoder.encode("1234"))
 //                .email("mehran773@gmail.com")
 //                .firstName("Mehran")
 //                .lastName("Khaki")

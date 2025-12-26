@@ -24,9 +24,13 @@ public class User extends BaseModel{
     @Column(unique = true,nullable = false)
     private String username;
 
-    @NotBlank
-    @Column(nullable = false)
-    private String password;
+    @Column(unique = true)
+    private String keycloakId;
+
+//
+//    @NotBlank
+//    @Column(nullable = false)
+//    private String password;
 
     @Email(message = "Invalid Email Address")
     @Column(unique = true,nullable = false)

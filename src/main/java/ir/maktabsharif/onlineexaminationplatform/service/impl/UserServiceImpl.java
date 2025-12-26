@@ -1,6 +1,5 @@
 package ir.maktabsharif.onlineexaminationplatform.service.impl;
 
-import ir.maktabsharif.onlineexaminationplatform.dto.DetailsUserDto;
 import ir.maktabsharif.onlineexaminationplatform.dto.EditDto;
 import ir.maktabsharif.onlineexaminationplatform.dto.SearchDto;
 import ir.maktabsharif.onlineexaminationplatform.model.Professor;
@@ -8,6 +7,7 @@ import ir.maktabsharif.onlineexaminationplatform.model.Role;
 import ir.maktabsharif.onlineexaminationplatform.model.Student;
 import ir.maktabsharif.onlineexaminationplatform.model.User;
 import ir.maktabsharif.onlineexaminationplatform.repository.UserRepository;
+import ir.maktabsharif.onlineexaminationplatform.service.KeycloakAdminService;
 import ir.maktabsharif.onlineexaminationplatform.service.UserService;
 import ir.maktabsharif.onlineexaminationplatform.util.UserSpecification;
 import jakarta.validation.constraints.Min;
@@ -16,14 +16,12 @@ import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -31,26 +29,26 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository repository;
+    private final KeycloakAdminService keycloakAdminService;
 
     @Override
     public User findByUsername(@NotBlank String username) {
         return repository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Username Not Found"));
     }
+//
+//    @Cacheable(value = "users",key = "#username")
+//    @Override
+//    public DetailsUserDto findDtoByUsername(String username) {
+//        User user = repository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Username Not Found"));
+//        DetailsUserDto dto = new DetailsUserDto();
+//        dto.setUsername(user.getUsername());
+//        dto.setPassword(user.getPassword());
+//        dto.setAuthorities(Arrays.asList(user.getRole().toString()));
+//        dto.setIsEnable(user.getIsEnable());
+//        return dto;
+//    }
 
-    @Cacheable(value = "users",key = "#username")
     @Override
-    public DetailsUserDto findDtoByUsername(String username) {
-        User user = repository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Username Not Found"));
-        DetailsUserDto dto = new DetailsUserDto();
-        dto.setUsername(user.getUsername());
-        dto.setPassword(user.getPassword());
-        dto.setAuthorities(Arrays.asList(user.getRole().toString()));
-        dto.setIsEnable(user.getIsEnable());
-        return dto;
-    }
-
-    @Override
-    @CacheEvict(value = "users",key = "#user.username")
     public User addOrUpdate(@NotNull User user) {
         return repository.save(user);
     }
@@ -65,10 +63,12 @@ public class UserServiceImpl implements UserService {
         return repository.findAll();
     }
 
+    @Transactional
     @Override
-    @CacheEvict(value = "users",key = "#root.target.findById(#id).username")
     public void deleteById(@Min(1L) Long id) {
-        repository.delete(findById(id));
+        User user = findById(id);
+        keycloakAdminService.deleteUser(user.getKeycloakId());
+        repository.delete(user);
     }
 
     @Override
@@ -87,34 +87,35 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @CacheEvict(value = "users",key = "#user.username")
     public User update(User user, EditDto dto) {
         User oldUser = findById(dto.id());
         if (user instanceof Professor && dto.role().equals(Role.STUDENT)){
+            keycloakAdminService.updateClientRole(oldUser.getKeycloakId(),oldUser.getRole().toString(),"STUDENT");
             repository.delete(user);
             Student student = Student.builder()
                     .username(oldUser.getUsername()).
-                    password(oldUser.getPassword()).
                     email(dto.email()).
                     isEnable(false).
                     nationalCode(dto.nationalCode()).
                     firstName(dto.firstName()).
                     lastName(dto.lastName()).
                     role(Role.STUDENT)
+                    .keycloakId(oldUser.getKeycloakId())
                     .build();
             return addOrUpdate(student);
         }
         if (user instanceof Student && dto.role().equals(Role.PROFESSOR)){
+            keycloakAdminService.updateClientRole(oldUser.getKeycloakId(),oldUser.getRole().toString(),"PROFESSOR");
             repository.delete(user);
             Professor professor = Professor.builder()
                     .username(oldUser.getUsername()).
-                    password(oldUser.getPassword()).
                     email(dto.email()).
                     isEnable(false).
                     nationalCode(dto.nationalCode()).
                     firstName(dto.firstName()).
                     lastName(dto.lastName()).
                     role(Role.PROFESSOR)
+                    .keycloakId(oldUser.getKeycloakId())
                     .build();
             return addOrUpdate(professor);
         }
