@@ -2,13 +2,16 @@ package ir.maktabsharif.onlineexaminationplatform.controller;
 
 import ir.maktabsharif.onlineexaminationplatform.dto.ExamAddDto;
 import ir.maktabsharif.onlineexaminationplatform.dto.ExamDto;
+import ir.maktabsharif.onlineexaminationplatform.dto.question.AddQuestionDTO;
+import ir.maktabsharif.onlineexaminationplatform.feign.QuestionFeign;
 import ir.maktabsharif.onlineexaminationplatform.mapper.DataMapper;
 import ir.maktabsharif.onlineexaminationplatform.model.Exam;
 import ir.maktabsharif.onlineexaminationplatform.model.Professor;
+import ir.maktabsharif.onlineexaminationplatform.model.QuestionType;
 import ir.maktabsharif.onlineexaminationplatform.model.User;
-import ir.maktabsharif.onlineexaminationplatform.service.CourseService;
 import ir.maktabsharif.onlineexaminationplatform.service.ExamService;
 import ir.maktabsharif.onlineexaminationplatform.service.UserService;
+import ir.maktabsharif.onlineexaminationplatform.util.I18NUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,13 +19,11 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import tools.jackson.databind.JsonNode;
 
 import java.security.Principal;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,6 +34,8 @@ public class RestProfessorController {
     private final DataMapper mapper;
     private final ExamService examService;
     private final UserService userService;
+    private final QuestionFeign feign;
+    private final I18NUtils messageUtil;
 
     @Transactional
     @PostMapping("/add-exam")
@@ -72,4 +75,31 @@ public class RestProfessorController {
         examService.addOrUpdate(exam);
         return ResponseEntity.ok("Successfully Edited");
     }
+    @Transactional
+    @PostMapping("/add-question")
+    @PreAuthorize("hasRole('PROFESSOR')")
+    public ResponseEntity<?> addQuestion(@Valid @RequestBody AddQuestionDTO dto){
+        if (dto.type() == QuestionType.MULTI_CHOICE) {
+            if (dto.choices() == null || dto.choices().isEmpty() || dto.choices().stream().anyMatch(String::isBlank) || dto.choices().size() < 2)
+                return ResponseEntity.status(400).body(Map.of("message", messageUtil.getMessage("choices.invalid")));
+            if (dto.correctChoice() == null || dto.correctChoice().isEmpty())
+                return ResponseEntity.status(400).body(Map.of("message", messageUtil.getMessage("correct.choice.invalid")));
+        }
+        if (dto.examId() != null && (dto.grade() == null || dto.grade() <= 0))
+            return ResponseEntity.status(400).body(Map.of("message", messageUtil.getMessage("grade.invalid")));
+
+        if (dto.save() != null && dto.save()){
+            if (feign.existQuestion(dto.courseId(), dto.professorId(), dto.title()))
+                return ResponseEntity.status(400).body(Map.of("message", messageUtil.getMessage("double.question.title")));
+            AddQuestionDTO bankDto = new AddQuestionDTO(
+                    null, dto.title(), dto.question(), dto.type(),dto.choices(),
+                    dto.correctChoice(), dto.courseId(), dto.professorId(), null,null,null
+            );
+            feign.addQuestion(bankDto);
+        }
+
+        feign.addQuestion(dto);
+        return ResponseEntity.ok("Successfully Added");
+    }
+
 }

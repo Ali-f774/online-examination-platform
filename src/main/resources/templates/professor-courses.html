@@ -24,6 +24,7 @@
                 <h3 style="display: inline-block" th:text="#{course.endDate}"></h3><h3 style="display: inline-block;margin-left: 15px" th:text="${course.endDate()}"></h3>
                 <br>
                 <h3 style="display: inline-block;border: solid white 2px"><a th:href="'/professor/course-exams?id='+${course.id()}" class="lang" th:text="#{details}"></a></h3>
+                <h3 style="display: inline-block;border: solid white 2px"><a th:href="'/professor/course-bank?id='+${course.id()}" class="lang" th:text="#{question.bank}"></a></h3>
             </div>
         </div>
     </div>

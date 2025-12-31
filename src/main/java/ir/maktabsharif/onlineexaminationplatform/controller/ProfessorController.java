@@ -2,6 +2,10 @@ package ir.maktabsharif.onlineexaminationplatform.controller;
 
 import ir.maktabsharif.onlineexaminationplatform.dto.CourseDto;
 import ir.maktabsharif.onlineexaminationplatform.dto.ExamDto;
+import ir.maktabsharif.onlineexaminationplatform.dto.question.AddQuestionDTO;
+import ir.maktabsharif.onlineexaminationplatform.dto.question.GeneralQuestionDTO;
+import ir.maktabsharif.onlineexaminationplatform.dto.question.GeneralReqDTO;
+import ir.maktabsharif.onlineexaminationplatform.feign.QuestionFeign;
 import ir.maktabsharif.onlineexaminationplatform.mapper.DataMapper;
 import ir.maktabsharif.onlineexaminationplatform.model.Course;
 import ir.maktabsharif.onlineexaminationplatform.model.Exam;
@@ -26,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/professor")
@@ -36,6 +41,7 @@ public class ProfessorController {
     private final DataMapper mapper;
     private final ExamService examService;
     private final CourseService courseService;
+    private final QuestionFeign questionFeign;
 
     @Transactional
     @GetMapping("/courses")
@@ -85,8 +91,34 @@ public class ProfessorController {
         model.addAttribute("course",mapper.courseToDto(course));
         return "course-exams";
     }
+    @GetMapping("/course-bank")
+    @PreAuthorize("hasRole('PROFESSOR')")
+    public String courseQuestionsBank(@RequestParam Long id,Model model,Principal principal){
+        Course course = courseService.findById(id);
+        User user = userService.findByUsername(principal.getName());
+        if (!(user instanceof Professor professor) || !professor.getId().equals(course.getProfessor().getId()))
+            throw new AccessDeniedException("Access Denied");
+        List<GeneralQuestionDTO> list = questionFeign.courseQuestionBank(course.getId(), professor.getId());
+        model.addAttribute("questions",list);
+        model.addAttribute("course",mapper.courseToDto(course));
+        return "course-bank";
+    }
 
-    @Transactional
+    @GetMapping("/exam-add-bank-question")
+    @PreAuthorize("hasRole('PROFESSOR')")
+    public String addBankExam(@RequestParam String id,@RequestParam Long examId,Model model,Principal principal){
+        Exam exam = examService.findById(examId);
+        User user = userService.findByUsername(principal.getName());
+        if (!(user instanceof Professor professor) || !courseService.validProfessor(exam.getCourse().getId(), professor.getId()) ||
+                !examService.validProfessor(examId,professor.getId()))
+            throw new AccessDeniedException("Access Denied");
+        AddQuestionDTO question = questionFeign.findById(id);
+        model.addAttribute("professorId",professor.getId());
+        model.addAttribute("courseId",exam.getCourse().getId());
+        model.addAttribute("examId",exam.getId());
+        model.addAttribute("question",question);
+        return "exam-add-bank-question";
+    }
     @GetMapping("/add-exam")
     @PreAuthorize("hasRole('PROFESSOR')")
     public String addExam(@RequestParam Long id,Model model,Principal principal){
@@ -99,6 +131,45 @@ public class ProfessorController {
     }
 
     @Transactional
+    @GetMapping("/add-question")
+    @PreAuthorize("hasRole('PROFESSOR')")
+    public String addQuestion(@RequestParam Long id,Model model,Principal principal){
+        User user = userService.findByUsername(principal.getName());
+        if (!(user instanceof Professor professor) || !courseService.validProfessor(id, professor.getId()))
+            throw new AccessDeniedException("Access Denied");
+        model.addAttribute("professorId",professor.getId());
+        model.addAttribute("courseId",id);
+        return "add-question";
+    }
+    @GetMapping("/add-exam-question")
+    @PreAuthorize("hasRole('PROFESSOR')")
+    public String addExamQuestion(@RequestParam Long id,Model model,Principal principal){
+        Exam exam = examService.findById(id);
+        User user = userService.findByUsername(principal.getName());
+        if (!(user instanceof Professor professor) || !courseService.validProfessor(exam.getCourse().getId(), professor.getId()) ||
+                !examService.validProfessor(id,professor.getId()))
+            throw new AccessDeniedException("Access Denied");
+        model.addAttribute("professorId",professor.getId());
+        model.addAttribute("courseId",exam.getCourse().getId());
+        model.addAttribute("examId",exam.getId());
+        return "add-exam-question";
+    }
+    @GetMapping("/exam-edit-question")
+    @PreAuthorize("hasRole('PROFESSOR')")
+    public String editExamQuestion(@RequestParam String id,@RequestParam Long examId,Model model,Principal principal){
+        Exam exam = examService.findById(examId);
+        User user = userService.findByUsername(principal.getName());
+        if (!(user instanceof Professor professor) || !courseService.validProfessor(exam.getCourse().getId(), professor.getId()) ||
+                !examService.validProfessor(examId,professor.getId()))
+            throw new AccessDeniedException("Access Denied");
+        AddQuestionDTO question = questionFeign.findById(id);
+        model.addAttribute("professorId",professor.getId());
+        model.addAttribute("courseId",exam.getCourse().getId());
+        model.addAttribute("examId",exam.getId());
+        model.addAttribute("question",question);
+        return "edit-exam-question";
+    }
+
     @GetMapping("/edit-exam")
     @PreAuthorize("hasRole('PROFESSOR')")
     public String editExam(@RequestParam Long id,Model model,Principal principal){
@@ -118,8 +189,55 @@ public class ProfessorController {
     @GetMapping("/exam-details")
     @PreAuthorize("hasRole('PROFESSOR')")
     public String examDetails(@RequestParam Long id,Model model,Principal principal){
-        //TODO
+        Exam exam = examService.findById(id);
+        User user = userService.findByUsername(principal.getName());
+        if (!(user instanceof Professor professor) ||
+                !courseService.validProfessor(exam.getCourse().getId(), professor.getId()) ||
+                !examService.validProfessor(id,professor.getId()))
+            throw new AccessDeniedException("Access Denied");
+        List<AddQuestionDTO> questions = questionFeign.findByExamId(id);
+        List<AddQuestionDTO> notUsed = questionFeign.findNotUsed(exam.getCourse().getId(), professor.getId());
+        Double totalGrade = questions.stream().mapToDouble(AddQuestionDTO::grade).sum();
+        model.addAttribute("questions",questions);
+        model.addAttribute("bankQuestions",notUsed);
+        model.addAttribute("totalGrade",totalGrade);
+        model.addAttribute("course",exam.getCourse());
+        model.addAttribute("exam",exam);
         return "exam-details";
+    }
+
+
+    @GetMapping("/remove-question")
+    @PreAuthorize("hasRole('PROFESSOR')")
+    public String removeQuestion(@RequestParam String id,Principal principal){
+        AddQuestionDTO byId = questionFeign.findById(id);
+        User user = userService.findByUsername(principal.getName());
+        if (!(user instanceof Professor professor) || !byId.professorId().equals(professor.getId()))
+            throw new AccessDeniedException("Access Denied");
+        questionFeign.deleteQuestion(id);
+        return "redirect:/professor/course-bank?id="+byId.courseId();
+    }
+
+    @GetMapping("/exam-remove-question")
+    @PreAuthorize("hasRole('PROFESSOR')")
+    public String removeExamQuestion(@RequestParam String id,Principal principal){
+        AddQuestionDTO byId = questionFeign.findById(id);
+        User user = userService.findByUsername(principal.getName());
+        if (!(user instanceof Professor professor) || !byId.professorId().equals(professor.getId()))
+            throw new AccessDeniedException("Access Denied");
+        questionFeign.deleteQuestion(id);
+        return "redirect:/professor/exam-details?id="+byId.examId();
+    }
+
+    @GetMapping("/edit-question")
+    @PreAuthorize("hasRole('PROFESSOR')")
+    public String editQuestion(@RequestParam String id,Model model,Principal principal){
+        AddQuestionDTO byId = questionFeign.findById(id);
+        User user = userService.findByUsername(principal.getName());
+        if (!(user instanceof Professor professor) || !byId.professorId().equals(professor.getId()))
+            throw new AccessDeniedException("Access Denied");
+        model.addAttribute("dto",byId);
+        return "edit-question";
     }
 
 }

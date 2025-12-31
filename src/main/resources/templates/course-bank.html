@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}"
+      th:attr="dir=#{dir}">
+<head>
+    <meta charset="UTF-8">
+    <title>Questions Bank</title>
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+<body>
+<div class="w-100 jce df" style="font-size: 30px"><a class="lang" style="border: solid white 2px;padding: 5px" href="/professor/courses" th:text="#{courses}"></a><a class="lang" th:href="'?lang=fa&'+'id='+${course.id()}">فارسی</a>|<a class="lang" th:href="'?lang=en&'+'id='+${course.id()}">English</a></div>
+<div class="w-100 df jcc">
+    <img th:src="'data:image/jpeg;base64,'+${course.image()}" width="225px" height="225px" th:alt="#{course.image}">
+</div>
+<div class="w-100 df jcc">
+    <h1 th:text="${course.title()}"></h1>
+</div>
+<hr>
+<div class="w-100 df jcc">
+    <h1 th:text="#{question.bank}"></h1>
+</div>
+<div class="w-100 df jce">
+    <a th:href="'/professor/add-question?id='+${course.id()}" class="lang" style="border: solid white 2px;font-size: 30px" th:text="#{add.question}"></a>
+</div>
+<div class="w-100 df jcc">
+    <table class="users-table">
+        <tr>
+            <th th:text="#{title}"></th>
+            <th th:text="#{question.type}"></th>
+            <th th:text="#{pending.edit}"></th>
+            <th th:text="#{delete}"></th>
+        </tr>
+        <tr th:each="question : ${questions}">
+            <td th:text="${question.title()}"></td>
+            <td th:if="${question.type().toString() == 'ESSAY'}" th:text="#{essay}"></td>
+            <td th:if="${question.type().toString() == 'MULTI_CHOICE'}" th:text="#{multi.choice}"></td>
+            <td class="apply-changes"><a style="text-decoration: none;color: white" th:href="'/professor/edit-question?id='+${question.id()}" th:text="#{pending.edit}"></a></td>
+            <td class="reject"><a style="text-decoration: none;color: white" th:href="'/professor/remove-question?id='+${question.id()}" th:text="#{delete}"></a></td>
+        </tr>
+    </table>
+
+</div>
+</body>
+</html>

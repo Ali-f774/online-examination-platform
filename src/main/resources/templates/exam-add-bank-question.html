@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}"
+      th:attr="dir=#{dir}">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Question</title>
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+<body>
+<div class="w-100 jce df" style="font-size: 30px"><a class="lang" style="border: solid white 2px;padding: 5px" href="#" onclick="back();return false;" th:text="#{back}"></a><a class="lang" href="#" onclick="updateLang('fa');return false;" >فارسی</a>|<a class="lang" href="#" onclick="updateLang('en');return false;">English</a></div>
+<div class="w-100 df jcc">
+    <h1 th:text="#{edit.add}"></h1>
+</div>
+<div class="w-100 df jcc " >
+    <form id="form">
+        <input type="hidden" id="courseId" th:value="${question.courseId()}">
+        <input type="hidden" id="professorId" th:value="${question.professorId()}">
+        <input type="hidden" id="examId" th:value="${examId}">
+        <input type="hidden" id="type" th:value="${question.type().toString()}">
+        <label for="title" th:text="#{title}" ></label><br>
+        <input type="text" id="title" th:value="${question.title()}" required><br>
+        <label th:text="#{question}"></label><br>
+        <div style="display: none" id="quillHTML" th:text="${question.question()}">
+        </div>
+        <div style="width: 95%;background-color: white;color: black;margin-left: 10px;">
+            <div id="editor" class="h-100 w-100"></div><br>
+        </div>
+        <label for="grade" th:text="#{question.grade}"></label><br>
+        <input type="number" th:value="${question.grade()}" id="grade"><br>
+        <div th:if="${question.type().toString() == 'MULTI_CHOICE'}">
+            <input type="hidden" id="startIndex" th:value="${question.choices().size()}">
+            <div id="choices">
+                <div th:each="choice : ${question.choices()}" class="choice">
+                    <input type="text" class="choice-text" th:value="${choice}" required>
+                    <input th:if="${question.correctChoice() == choice}" type="radio" name="correctChoice" th:value="${question.choices().indexOf(choice)}" checked>
+                    <input th:if="${question.correctChoice() != choice}" type="radio" name="correctChoice" th:value="${question.choices().indexOf(choice)}">
+                    <button type="button" onclick="removeChoice(this)">❌</button>
+                </div>
+            </div>
+            <button id="addChoiceBtn" class="sb" type="button" th:text="#{add.choice}" style="font-size: 15px" onclick="addChoice()"></button>
+        </div>
+        <br><label for="save" th:text="#{save.in.bank}"></label>
+        <input id="save" type="checkbox"><br>
+        <div class="w-100 df jcc">
+            <button class="sb" type="submit" th:text="#{edit.add}"></button>
+        </div>
+    </form>
+</div>
+<div id="error-div" class="w-100 df jcc ed">
+
+</div>
+</body>
+<script src="https://cdn.quilljs.com/1.3.7/quill.js"></script>
+<script>
+    const form = document.getElementById("form");
+    const titleInp = document.getElementById("title");
+    const typeInp = document.getElementById("type");
+    const errorDiv = document.getElementById("error-div");
+    const choicesDiv = document.getElementById("choices");
+    const courseId = document.getElementById("courseId").value;
+    const professorId = document.getElementById("professorId").value;
+    const examId = document.getElementById("examId").value;
+    const gradeInp = document.getElementById("grade");
+    const saveBox = document.getElementById("save");
+    form.addEventListener("submit",function (event) {
+        event.preventDefault();
+        const choiceDivs = document.querySelectorAll(".choice");
+        const choices = [];
+        const correctIndex =
+            document.querySelector('input[name="correctChoice"]:checked')?.value;
+        let correctChoice;
+        choiceDivs.forEach((div, index) => {
+            const text = div.querySelector(".choice-text").value;
+
+            choices.push(text);
+            if(String(index) === correctIndex){
+                correctChoice = text;
+            }
+        });
+        const title = titleInp.value;
+        const type = typeInp.value;
+        const grade = gradeInp.value;
+        const question = quill.root.innerHTML;
+        const save = saveBox.checked;
+        let data = {title,question,type,choices,correctChoice,courseId,professorId,examId,grade,save}
+        fetch("/api/v1/professor/add-question",{
+                method: "POST",
+                credentials: 'include',
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify(data)
+            }
+        ).then(async res => {
+            if (!res.ok) {
+                const errorBody = await res.json();
+
+                throw new Error(errorBody.message)
+            }
+
+            window.location.replace(`/professor/exam-details?id=`+examId)
+        })
+            .catch(error => {
+                errorDiv.innerText = error.message
+            })
+
+    })
+    function back(){
+        window.location.replace(`/professor/exam-details?id=`+examId)
+    }
+    function updateLang (lang){
+        let url = new URL(window.location.href)
+        url.searchParams.set('lang',lang);
+        window.location.href = url.toString();
+    }
+    let quill = new Quill('#editor', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                [{ 'direction': 'rtl' }],
+                [{ 'align': [] }],
+                ['bold', 'italic', 'underline'],
+                [{ 'size': ['small', false, 'large', 'huge'] }],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['image', 'formula'],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'font': [] }],
+                ['clean']
+            ]
+        },
+    });
+    quill.root.innerHTML = document.getElementById("quillHTML")?.innerText;
+    let choiceIndex = parseInt(document.getElementById("startIndex")?.value);
+
+    function addChoice() {
+        const div = document.createElement("div");
+        div.classList.add("choice");
+
+        div.innerHTML = `
+        <input type="text" class="choice-text" required>
+        <input type="radio" name="correctChoice" value="${choiceIndex}">
+        <button type="button" onclick="removeChoice(this)">❌</button>
+    `;
+
+        choicesDiv.appendChild(div);
+        choiceIndex++;
+    }
+
+    function removeChoice(btn) {
+        btn.parentElement.remove();
+    }
+
+</script>
+</html>

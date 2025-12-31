@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}"
+      th:attr="dir=#{dir}">
+<head>
+    <meta charset="UTF-8">
+    <title>Exam Details</title>
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+<body>
+<div class="w-100 jce df" style="font-size: 30px"><a class="lang" style="border: solid white 2px;padding: 5px" th:href="'/professor/course-exams?id='+${course.getId()}" th:text="#{exams}"></a><a class="lang" th:href="'?lang=fa&'+'id='+${exam.getId()}">فارسی</a>|<a class="lang" th:href="'?lang=en&'+'id='+${exam.getId()}">English</a></div>
+<hr>
+<div class="w-100 df jcc">
+    <h1 th:text="#{questions}"></h1>
+</div>
+<div class="w-100 df jce">
+    <a th:href="'/professor/add-exam-question?id='+${exam.getId()}" class="lang" style="border: solid white 2px;font-size: 30px" th:text="#{add.question}"></a>
+</div>
+<div class="w-100 df jcc">
+    <table class="users-table">
+        <tr>
+            <th th:text="#{title}"></th>
+            <th th:text="#{question.type}"></th>
+            <th th:text="#{question.grade}"></th>
+            <th th:text="#{pending.edit}"></th>
+            <th th:text="#{delete}"></th>
+        </tr>
+        <tr th:each="question : ${questions}">
+            <td th:text="${question.title()}"></td>
+            <td th:if="${question.type().toString() == 'ESSAY'}" th:text="#{essay}"></td>
+            <td th:if="${question.type().toString() == 'MULTI_CHOICE'}" th:text="#{multi.choice}"></td>
+            <td th:text="${question.grade()}"></td>
+            <td class="apply-changes"><a style="text-decoration: none;color: white" th:href="'/professor/exam-edit-question?id='+${question.id()}+'&examId='+${exam.getId()}" th:text="#{pending.edit}"></a></td>
+            <td class="reject"><a style="text-decoration: none;color: white" th:href="'/professor/exam-remove-question?id='+${question.id()}" th:text="#{delete}"></a></td>
+        </tr>
+        <tr>
+            <th colspan="3" th:text="#{total.grade}"></th>
+            <td colspan="2" th:text="${totalGrade}"></td>
+        </tr>
+    </table>
+</div>
+<hr>
+<div class="w-100 df jcc">
+    <h1 th:text="#{question.bank}"></h1>
+</div>
+<div class="w-100 df jcc">
+    <table class="users-table">
+        <tr>
+            <th th:text="#{title}"></th>
+            <th th:text="#{question.type}"></th>
+            <th th:text="#{add.question}"></th>
+        </tr>
+        <tr th:each="question : ${bankQuestions}">
+            <td th:text="${question.title()}"></td>
+            <td th:if="${question.type().toString() == 'ESSAY'}" th:text="#{essay}"></td>
+            <td th:if="${question.type().toString() == 'MULTI_CHOICE'}" th:text="#{multi.choice}"></td>
+            <td class="approve"><a style="text-decoration: none;color: white" th:href="'/professor/exam-add-bank-question?id='+${question.id()}+'&examId='+${exam.getId()}" th:text="#{add.question}"></a></td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
