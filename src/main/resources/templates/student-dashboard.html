@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}"
+      th:attr="dir=#{dir}">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+<body>
+<div class="w-100 jce df" style="font-size: 30px"><a class="lang" style="border: solid red 2px;color: red;padding: 5px" href="/logout" th:text="#{logout}"></a><a class="lang" href="?lang=fa">فارسی</a>|<a class="lang" href="?lang=en">English</a></div>
+<div class="df w-100 jcc">
+    <h1 th:text="#{student.dashboard}" style="font-size: 50px"></h1>
+</div>
+<div class="dg w-100 jcc">
+    <a th:text="#{courses}" class="df jcc lang w-100" href="/student/courses" style="font-size: 35px;border: solid white 2px;margin-top: 100px"></a>
+</div>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}"
+      th:attr="dir=#{dir}">
+<head>
+    <meta charset="UTF-8">
+    <title>Course Exams</title>
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+<body>
+<div class="w-100 jce df" style="font-size: 30px"><a class="lang" style="border: solid white 2px;padding: 5px" href="/student/courses" th:text="#{courses}"></a><a class="lang" th:href="'?lang=fa&'+'id='+${course.id()}">فارسی</a>|<a class="lang" th:href="'?lang=en&'+'id='+${course.id()}">English</a></div>
+<div class="w-100 df jcc">
+    <img th:src="'data:image/jpeg;base64,'+${course.image()}" width="225px" height="225px" th:alt="#{course.image}">
+</div>
+<div class="w-100 df jcc">
+    <h1 th:text="${course.title()}"></h1>
+</div>
+<hr>
+<div class="w-100 df jcc">
+    <h1 th:text="#{exams}"></h1>
+</div>
+
+<div class="w-100 df jcc" th:if="${exams.isEmpty()}">
+    <h1 th:text="#{exams.isEmpty}"></h1>
+</div>
+<div class="w-100 jcc df" th:if="${!exams.isEmpty()}">
+    <table class="users-table">
+        <tr>
+            <th th:text="#{title}"></th>
+            <th th:text="#{description}"></th>
+            <th th:text="#{time}"></th>
+            <th th:text="#{exam.start}"></th>
+        </tr>
+        <tr th:each="exam : ${exams}">
+            <td th:text="${exam.title()}"></td>
+            <td th:text="${exam.description()}"></td>
+            <td th:text="${exam.time()}+' '+#{minute}"></td>
+            <td class="approve"><a style="text-decoration: none;color: black" th:href="'/student/exam-start?id='+${exam.id()}" th:text="#{exam.start}"></a></td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

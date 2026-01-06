@@ -53,4 +53,9 @@ public class ExamServiceImpl implements ExamService {
     public Boolean validProfessor(Long id, Long professorId) {
         return repository.existsByIdAndProfessor_Id(id,professorId);
     }
+
+    @Override
+    public List<Exam> findAllOpenStudentExams(Long courseId, Long studentId) {
+        return repository.findAllOpenStudentCourses(courseId, studentId);
+    }
 }

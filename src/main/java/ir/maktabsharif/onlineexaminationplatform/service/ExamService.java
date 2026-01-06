@@ -8,4 +8,5 @@ public interface ExamService extends CrudService<Exam>{
 
     List<Exam> findAllByCourseIdAndProfessorId(Long courseId,Long ProfessorId);
     Boolean validProfessor(Long id,Long professorId);
+    List<Exam> findAllOpenStudentExams(Long courseId,Long studentId);
 }

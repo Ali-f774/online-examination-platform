@@ -4,7 +4,6 @@ import ir.maktabsharif.onlineexaminationplatform.dto.CourseDto;
 import ir.maktabsharif.onlineexaminationplatform.dto.ExamDto;
 import ir.maktabsharif.onlineexaminationplatform.dto.question.AddQuestionDTO;
 import ir.maktabsharif.onlineexaminationplatform.dto.question.GeneralQuestionDTO;
-import ir.maktabsharif.onlineexaminationplatform.dto.question.GeneralReqDTO;
 import ir.maktabsharif.onlineexaminationplatform.feign.QuestionFeign;
 import ir.maktabsharif.onlineexaminationplatform.mapper.DataMapper;
 import ir.maktabsharif.onlineexaminationplatform.model.Course;
@@ -30,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/professor")

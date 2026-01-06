@@ -7,4 +7,6 @@ public interface CourseRepository extends JpaRepository<Course,Long> {
 
     Boolean existsByIdAndProfessor_Id(Long id,Long professorId);
 
+    Boolean existsByIdAndStudents_Id(Long id, Long studentsId);
+
 }

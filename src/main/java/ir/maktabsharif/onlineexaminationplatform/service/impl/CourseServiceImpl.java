@@ -48,4 +48,9 @@ public class CourseServiceImpl implements CourseService {
     public Boolean validProfessor(Long id, Long professorId) {
         return repository.existsByIdAndProfessor_Id(id,professorId);
     }
+
+    @Override
+    public Boolean validStudent(Long id, Long studentId) {
+        return repository.existsByIdAndStudents_Id(id, studentId);
+    }
 }
