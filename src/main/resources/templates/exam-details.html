@@ -57,5 +57,41 @@
         </tr>
     </table>
 </div>
+<hr>
+<div class="w-100 df jcc">
+    <h1 th:text="#{notCorrection.exams}"></h1>
+</div>
+<div class="w-100 df jcc">
+    <table class="users-table">
+        <tr>
+            <th th:text="#{register.first.name}"></th>
+            <th th:text="#{register.nationalCode}"></th>
+            <th th:text="#{correction}"></th>
+        </tr>
+        <tr th:each="student : ${notCorrections}">
+            <td th:text="${student.firstName()}+' '+${student.lastName()}"></td>
+            <td th:text="${student.nationalCode()}"></td>
+            <td class="approve"><a style="text-decoration: none;color: white" th:href="'/professor/exam-correction?id='+${student.id()}+'&examId='+${exam.getId()}" th:text="#{correction}"></a></td>
+        </tr>
+    </table>
+</div>
+<hr>
+<div class="w-100 df jcc">
+    <h1 th:text="#{correction.exams}"></h1>
+</div>
+<div class="w-100 df jcc">
+    <table class="users-table">
+        <tr>
+            <th th:text="#{register.first.name}"></th>
+            <th th:text="#{register.nationalCode}"></th>
+            <th th:text="#{exam.details}"></th>
+        </tr>
+        <tr th:each="student : ${corrections}">
+            <td th:text="${student.firstName()}+' '+${student.lastName()}"></td>
+            <td th:text="${student.nationalCode()}"></td>
+            <td class="approve"><a style="text-decoration: none;color: white" th:href="'/professor/exam-correction-details?id='+${student.id()}+'&examId='+${exam.getId()}" th:text="#{exam.details}"></a></td>
+        </tr>
+    </table>
+</div>
 </body>
 </html>

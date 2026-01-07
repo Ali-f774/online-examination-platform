@@ -1,11 +1,9 @@
 package ir.maktabsharif.onlineexaminationplatform.controller;
 
 import ir.maktabsharif.onlineexaminationplatform.dto.answer.AddAnswerDTO;
+import ir.maktabsharif.onlineexaminationplatform.dto.question.AddQuestionDTO;
 import ir.maktabsharif.onlineexaminationplatform.feign.QuestionFeign;
-import ir.maktabsharif.onlineexaminationplatform.model.Course;
-import ir.maktabsharif.onlineexaminationplatform.model.Exam;
-import ir.maktabsharif.onlineexaminationplatform.model.Student;
-import ir.maktabsharif.onlineexaminationplatform.model.User;
+import ir.maktabsharif.onlineexaminationplatform.model.*;
 import ir.maktabsharif.onlineexaminationplatform.service.CourseService;
 import ir.maktabsharif.onlineexaminationplatform.service.ExamService;
 import ir.maktabsharif.onlineexaminationplatform.service.UserService;
@@ -19,6 +17,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import tools.jackson.databind.JsonNode;
 
+import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -36,7 +35,7 @@ public class RestStudentController {
     @GetMapping("/student")
     public ResponseEntity<AddAnswerDTO> getStudentAnswer(@RequestParam Long studentId,@RequestParam String questionId){
         AddAnswerDTO studentAnswer = answerFeign.getStudentAnswer(studentId, questionId);
-        return ResponseEntity.ok(Objects.requireNonNullElseGet(studentAnswer, () -> new AddAnswerDTO("", null, "", "")));
+        return ResponseEntity.ok(Objects.requireNonNullElseGet(studentAnswer, () -> new AddAnswerDTO("", null, "", "",0.0)));
     }
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
@@ -64,6 +63,17 @@ public class RestStudentController {
         student.getExams().add(exam);
         userService.addOrUpdate(student);
         examService.addOrUpdate(exam);
+        List<AddAnswerDTO> examAnswers = answerFeign.getExamAnswers(student.getId(), exam.getId());
+        for (AddAnswerDTO answer : examAnswers) {
+            AddQuestionDTO question = answerFeign.findById(answer.questionId());
+            if (question.type().equals(QuestionType.MULTI_CHOICE)){
+                if (answer.answer() != null && !answer.answer().isEmpty() && answer.answer().equals(question.correctChoice())){
+                    answerFeign.addOrUpdateAnswer(new AddAnswerDTO(answer.id(),answer.studentId(),answer.answer(),answer.questionId(), question.grade()));
+                }else {
+                    answerFeign.addOrUpdateAnswer(new AddAnswerDTO(answer.id(),answer.studentId(),answer.answer(),answer.questionId(),0.0));
+                }
+            }
+        }
         return "Successfully";
     }
 

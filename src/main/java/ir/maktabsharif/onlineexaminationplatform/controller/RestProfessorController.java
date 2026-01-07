@@ -5,11 +5,9 @@ import ir.maktabsharif.onlineexaminationplatform.dto.ExamDto;
 import ir.maktabsharif.onlineexaminationplatform.dto.question.AddQuestionDTO;
 import ir.maktabsharif.onlineexaminationplatform.feign.QuestionFeign;
 import ir.maktabsharif.onlineexaminationplatform.mapper.DataMapper;
-import ir.maktabsharif.onlineexaminationplatform.model.Exam;
-import ir.maktabsharif.onlineexaminationplatform.model.Professor;
-import ir.maktabsharif.onlineexaminationplatform.model.QuestionType;
-import ir.maktabsharif.onlineexaminationplatform.model.User;
+import ir.maktabsharif.onlineexaminationplatform.model.*;
 import ir.maktabsharif.onlineexaminationplatform.service.ExamService;
+import ir.maktabsharif.onlineexaminationplatform.service.StudentExamService;
 import ir.maktabsharif.onlineexaminationplatform.service.UserService;
 import ir.maktabsharif.onlineexaminationplatform.util.I18NUtils;
 import jakarta.validation.Valid;
@@ -36,6 +34,7 @@ public class RestProfessorController {
     private final UserService userService;
     private final QuestionFeign feign;
     private final I18NUtils messageUtil;
+    private final StudentExamService studentExamService;
 
     @Transactional
     @PostMapping("/add-exam")
@@ -101,5 +100,21 @@ public class RestProfessorController {
         feign.addQuestion(dto);
         return ResponseEntity.ok("Successfully Added");
     }
-
+    @PostMapping("/finally-register")
+    @PreAuthorize("hasRole('PROFESSOR')")
+    public ResponseEntity<?> finallyRegister(@RequestBody JsonNode node,Principal principal){
+        Long studentId = node.get("studentId").asLong();
+        Long examId = node.get("examId").asLong();
+        Exam exam = examService.findById(examId);
+        User user = userService.findByUsername(principal.getName());
+        if (!(user instanceof Professor professor) ||
+                !examService.validProfessor(exam.getId(),professor.getId()))
+            throw new AccessDeniedException("Access Denied");
+        StudentExam studentExam = studentExamService.findByStudentIdAndExamId(studentId, examId);
+        if(feign.getExamAnswers(studentId,examId).stream().anyMatch(a -> a.grade() == null))
+            return ResponseEntity.status(400).body(Map.of("message",messageUtil.getMessage("fill.all.grades")));
+        studentExam.setIsCorrection(true);
+        studentExamService.addOrUpdate(studentExam);
+        return ResponseEntity.ok("Successfully");
+    }
 }

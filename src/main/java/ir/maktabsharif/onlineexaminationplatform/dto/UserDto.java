@@ -1,7 +1,5 @@
 package ir.maktabsharif.onlineexaminationplatform.dto;
 
-import ir.maktabsharif.onlineexaminationplatform.model.Role;
-
 public record UserDto(
         Long id,
         String username,

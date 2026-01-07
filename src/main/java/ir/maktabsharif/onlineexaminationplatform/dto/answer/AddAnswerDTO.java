@@ -4,6 +4,7 @@ public record AddAnswerDTO(
         String id,
         Long studentId,
         String answer,
-        String questionId
+        String questionId,
+        Double grade
 ) {
 }

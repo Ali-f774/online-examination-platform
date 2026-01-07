@@ -29,5 +29,9 @@ public class StudentExam extends BaseModel{
     private Long examId;
 
     private Long endTime;
+
+    private Double grade;
+
+    private Boolean isCorrection;
 }
 

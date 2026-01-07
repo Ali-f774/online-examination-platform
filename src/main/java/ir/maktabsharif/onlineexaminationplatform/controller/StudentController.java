@@ -109,7 +109,7 @@ public class StudentController {
         if (studentExam == null){
             Instant now = Instant.now();
             endTime = now.plusSeconds(exam.getTime()*60).toEpochMilli();
-            studentExamService.addOrUpdate(new StudentExam(student.getId(), exam.getId(),endTime));
+            studentExamService.addOrUpdate(new StudentExam(student.getId(), exam.getId(),endTime,0.0,false));
         }else {
             endTime = studentExam.getEndTime();
         }

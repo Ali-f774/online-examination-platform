@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}"
+      th:attr="dir=#{dir}">
+<head>
+    <meta charset="UTF-8">
+    <title>Exam Correction</title>
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+<body>
+<div class="w-100 jce df" style="font-size: 30px"><a class="lang" style="border: solid white 2px;padding: 5px" href="#" onclick="back();return false;" th:text="#{back}"></a><a class="lang" href="#" onclick="updateLang('fa');return false;" >فارسی</a>|<a class="lang" href="#" onclick="updateLang('en');return false;">English</a></div>
+<div class="w-100 dg jcc answer-row" style="border: solid white 5px" th:each="answer : ${answers}"
+     th:data-student-id="${answer.getSecond().studentId()}"
+th:data-question-id="${answer.getSecond().questionId()}">
+    <div id="quillHTML" class="w-100" style="font-size: 25px" th:utext="${answer.getFirst().question()}"></div>
+    <br>
+    <div class="w-100" style="background-color: white;color: black;font-size: 20px">
+        <p th:text="${answer.getSecond().answer()}"></p>
+    </div>
+    <br>
+        <input type="hidden" name="studentId" th:value="${answer.getSecond().studentId()}">
+        <input type="hidden" name="questionId" th:value="${answer.getSecond().questionId()}">
+        <label for="grade" th:text="#{question.grade}"></label><br>
+        <input type="number" class="grade-input" name="grade" th:value="${answer.getSecond().grade() != null?answer.getSecond().grade():0.0}" id="grade" required>
+        <p style="font-size: 30px" th:text="'(0 - '+${answer.getFirst().grade()}+')'"></p><br>
+    <button class="sb"
+       onclick="registerGrade(this)"
+       th:text="#{register.grade}">
+    </button>
+
+</div>
+<div id="error-div" class="w-100 df jcc ed">
+    <h2 th:if="${param.err}" th:text="#{grade.err}"></h2>
+</div>
+<div class="w-100 df jcc">
+    <button id="finallyRegister" class="sb" th:text="#{finally.register}"></button>
+</div>
+<input type="hidden" id="studentId" th:value="${answers.get(0).getSecond().studentId()}">
+<input type="hidden" id="examId" th:value="${answers.get(0).getFirst().examId()}">
+</body>
+<script>
+    const finallyRegister = document.getElementById("finallyRegister");
+    const errorDiv = document.getElementById("error-div");
+    const studentId = document.getElementById("studentId").value;
+    const examId = document.getElementById("examId").value;
+    finallyRegister.addEventListener("click",function (){
+
+        const data = {studentId,examId}
+        fetch("/api/v1/professor/finally-register",{
+                method: "POST",
+                credentials: 'include',
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify(data)
+            }
+        ).then(async res => {
+            if (!res.ok) {
+                const errorBody = await res.json();
+                throw new Error(errorBody.message)
+            }
+            back()
+        })
+            .catch(error => {
+                errorDiv.innerText = error.message
+            })
+    })
+    function registerGrade(anchor) {
+        const container = anchor.closest('.answer-row');
+
+        const studentId = container.dataset.studentId;
+        const questionId = container.dataset.questionId;
+        const grade = container.querySelector('.grade-input').value;
+
+
+        window.location.href =
+            '/professor/register-grade'
+            + '?studentId=' + studentId
+            + '&questionId=' + questionId
+            + '&grade=' + grade;
+    }
+
+function back(){
+        window.location.replace(`/professor/exam-details?id=`+examId)
+    }
+    function updateLang (lang){
+        let url = new URL(window.location.href)
+        url.searchParams.set('lang',lang);
+        window.location.href = url.toString();
+    }
+</script>
+</html>

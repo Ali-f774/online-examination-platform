@@ -2,33 +2,39 @@ package ir.maktabsharif.onlineexaminationplatform.controller;
 
 import ir.maktabsharif.onlineexaminationplatform.dto.CourseDto;
 import ir.maktabsharif.onlineexaminationplatform.dto.ExamDto;
+import ir.maktabsharif.onlineexaminationplatform.dto.UserDto;
+import ir.maktabsharif.onlineexaminationplatform.dto.answer.AddAnswerDTO;
 import ir.maktabsharif.onlineexaminationplatform.dto.question.AddQuestionDTO;
 import ir.maktabsharif.onlineexaminationplatform.dto.question.GeneralQuestionDTO;
 import ir.maktabsharif.onlineexaminationplatform.feign.QuestionFeign;
 import ir.maktabsharif.onlineexaminationplatform.mapper.DataMapper;
-import ir.maktabsharif.onlineexaminationplatform.model.Course;
-import ir.maktabsharif.onlineexaminationplatform.model.Exam;
-import ir.maktabsharif.onlineexaminationplatform.model.Professor;
-import ir.maktabsharif.onlineexaminationplatform.model.User;
+import ir.maktabsharif.onlineexaminationplatform.model.*;
 import ir.maktabsharif.onlineexaminationplatform.service.CourseService;
 import ir.maktabsharif.onlineexaminationplatform.service.ExamService;
+import ir.maktabsharif.onlineexaminationplatform.service.StudentExamService;
 import ir.maktabsharif.onlineexaminationplatform.service.UserService;
 import ir.maktabsharif.onlineexaminationplatform.util.DateUtils;
+import ir.maktabsharif.onlineexaminationplatform.util.I18NUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.util.Pair;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Controller
 @RequestMapping("/professor")
@@ -40,6 +46,8 @@ public class ProfessorController {
     private final ExamService examService;
     private final CourseService courseService;
     private final QuestionFeign questionFeign;
+    private final StudentExamService studentExamService;
+    private final I18NUtils i18NUtils;
 
     @Transactional
     @GetMapping("/courses")
@@ -196,11 +204,18 @@ public class ProfessorController {
         List<AddQuestionDTO> questions = questionFeign.findByExamId(id);
         List<AddQuestionDTO> notUsed = questionFeign.findNotUsed(exam.getCourse().getId(), professor.getId());
         Double totalGrade = questions.stream().mapToDouble(AddQuestionDTO::grade).sum();
+        Map<Boolean, List<Student>> students = exam.getStudents().stream().collect(Collectors.partitioningBy(s ->
+                studentExamService.findByStudentIdAndExamId(s.getId(), exam.getId()).getIsCorrection()
+        ));
+        List<UserDto> corrections = students.get(true).stream().map(mapper::UserToDto).toList();
+        List<UserDto> notCorrections = students.get(false).stream().map(mapper::UserToDto).toList();
         model.addAttribute("questions",questions);
         model.addAttribute("bankQuestions",notUsed);
         model.addAttribute("totalGrade",totalGrade);
         model.addAttribute("course",exam.getCourse());
         model.addAttribute("exam",exam);
+        model.addAttribute("notCorrections",notCorrections);
+        model.addAttribute("corrections",corrections);
         return "exam-details";
     }
 
@@ -236,6 +251,46 @@ public class ProfessorController {
             throw new AccessDeniedException("Access Denied");
         model.addAttribute("dto",byId);
         return "edit-question";
+    }
+
+    @GetMapping("/exam-correction")
+    @PreAuthorize("hasRole('PROFESSOR')")
+    public String examCorrection(@RequestParam Long id,@RequestParam Long examId,Principal principal,Model model){
+        Exam exam = examService.findById(examId);
+        User user = userService.findByUsername(principal.getName());
+        if (!(user instanceof Professor professor) ||
+                !courseService.validProfessor(exam.getCourse().getId(), professor.getId()) ||
+                !examService.validProfessor(exam.getId(),professor.getId()))
+            throw new AccessDeniedException("Access Denied");
+        User studentUser = userService.findById(id);
+        if (!(studentUser instanceof Student student))
+            throw new IllegalArgumentException("This User Is Not Student");
+        List<Pair<AddQuestionDTO,AddAnswerDTO>> examAnswers = new ArrayList<>();
+        questionFeign.getExamAnswers(student.getId(), exam.getId()).forEach(a -> {
+            AddQuestionDTO question = questionFeign.findById(a.questionId());
+            if (QuestionType.ESSAY.equals(question.type())){
+                examAnswers.add(Pair.of(question,a));
+            }
+                });
+        model.addAttribute("answers",examAnswers);
+        return "exam-correction";
+    }
+
+    @GetMapping("/register-grade")
+    @PreAuthorize("hasRole('PROFESSOR')")
+    public String registerGrade(@RequestParam Long studentId,@RequestParam String questionId,@RequestParam Double grade,Principal principal){
+        AddAnswerDTO answer = questionFeign.getStudentAnswer(studentId, questionId);
+        AddQuestionDTO question = questionFeign.findById(questionId);
+        Exam exam = examService.findById(question.examId());
+        User user = userService.findByUsername(principal.getName());
+        if (!(user instanceof Professor professor) ||
+                !courseService.validProfessor(exam.getCourse().getId(), professor.getId()) ||
+                !examService.validProfessor(exam.getId(),professor.getId()))
+            throw new AccessDeniedException("Access Denied");
+        if (grade < 0 || grade > question.grade())
+            return "redirect:/professor/exam-correction?id="+studentId+"&examId="+exam.getId()+"&err";
+        questionFeign.addOrUpdateAnswer(new AddAnswerDTO(answer.id(),answer.studentId(), answer.answer(), answer.questionId(),grade));
+        return "redirect:/professor/exam-correction?id="+studentId+"&examId="+exam.getId();
     }
 
 }
