@@ -276,6 +276,27 @@ public class ProfessorController {
         return "exam-correction";
     }
 
+    @GetMapping("/exam-correction-details")
+    @PreAuthorize("hasRole('PROFESSOR')")
+    public String examCorrectionDetails(@RequestParam Long id,@RequestParam Long examId,Principal principal,Model model){
+        Exam exam = examService.findById(examId);
+        User user = userService.findByUsername(principal.getName());
+        if (!(user instanceof Professor professor) ||
+                !courseService.validProfessor(exam.getCourse().getId(), professor.getId()) ||
+                !examService.validProfessor(exam.getId(),professor.getId()))
+            throw new AccessDeniedException("Access Denied");
+        User studentUser = userService.findById(id);
+        if (!(studentUser instanceof Student student))
+            throw new IllegalArgumentException("This User Is Not Student");
+        List<Pair<AddQuestionDTO,AddAnswerDTO>> examAnswers = new ArrayList<>();
+        questionFeign.getExamAnswers(student.getId(), exam.getId()).forEach(a -> {
+            AddQuestionDTO question = questionFeign.findById(a.questionId());
+            examAnswers.add(Pair.of(question,a));
+                });
+        model.addAttribute("answers",examAnswers);
+        return "exam-correction-details";
+    }
+
     @GetMapping("/register-grade")
     @PreAuthorize("hasRole('PROFESSOR')")
     public String registerGrade(@RequestParam Long studentId,@RequestParam String questionId,@RequestParam Double grade,Principal principal){

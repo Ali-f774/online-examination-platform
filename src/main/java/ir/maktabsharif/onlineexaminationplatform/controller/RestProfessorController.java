@@ -117,4 +117,23 @@ public class RestProfessorController {
         studentExamService.addOrUpdate(studentExam);
         return ResponseEntity.ok("Successfully");
     }
+
+    @PostMapping("/change-to-not-corrected")
+    @PreAuthorize("hasRole('PROFESSOR')")
+    public ResponseEntity<?> changeToNotCorrected(@RequestBody JsonNode node,Principal principal){
+        Long studentId = node.get("studentId").asLong();
+        Long examId = node.get("examId").asLong();
+        Exam exam = examService.findById(examId);
+        User user = userService.findByUsername(principal.getName());
+        if (!(user instanceof Professor professor) ||
+                !examService.validProfessor(exam.getId(),professor.getId()))
+            throw new AccessDeniedException("Access Denied");
+        StudentExam studentExam = studentExamService.findByStudentIdAndExamId(studentId, examId);
+        if(feign.getExamAnswers(studentId,examId).stream().anyMatch(a -> a.grade() == null))
+            return ResponseEntity.status(400).body(Map.of("message",messageUtil.getMessage("fill.all.grades")));
+        studentExam.setIsCorrection(false);
+        studentExamService.addOrUpdate(studentExam);
+        return ResponseEntity.ok("Successfully");
+    }
+
 }
